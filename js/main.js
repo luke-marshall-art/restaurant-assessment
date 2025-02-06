@@ -234,9 +234,15 @@ function saveImage() {
 }
 
 function redrawCanvas() {
-    const photo = ctx.getImageData(0, 0, canvas.width, canvas.height);
-    ctx.putImageData(photo, 0, 0);
+    // Clear the entire canvas first
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
 
+    // Redraw the original photo
+    const photo = new Image();
+    photo.src = canvas.toDataURL();
+    ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+
+    // Now draw all stickers
     stickers.forEach(sticker => {
         ctx.drawImage(sticker.img, sticker.x, sticker.y, sticker.width, sticker.height);
 
@@ -295,7 +301,7 @@ function handleTouchStart(evt) {
             return;
         }
 
-        // Check for drag
+        // Check for drag queen haha
         if (x >= sticker.x && x <= sticker.x + sticker.width &&
             y >= sticker.y && y <= sticker.y + sticker.height) {
             activeSticker = sticker;
