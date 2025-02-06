@@ -2,11 +2,21 @@ let currentLocation = 'front';
 let stream = null;
 let stickers = [];
 
+const stickerImages = {};  // Will store our preloaded images
 const video = document.getElementById('videoElement');
 const canvas = document.getElementById('canvas');
 const captureBtn = document.getElementById('captureBtn');
 const saveBtn = document.getElementById('saveBtn');
 const ctx = canvas.getContext('2d');
+
+window.addEventListener('load', () => {
+    const stickerTypes = ['fountain', 'electrical', 'syrup', 'storage'];
+    stickerTypes.forEach(type => {
+        const img = new Image();
+        img.src = `images/${type}-marker.png`;
+        stickerImages[type] = img;
+    });
+});
 
 async function startCamera() {
     try {
@@ -158,16 +168,29 @@ function addSticker(stickerType) {
         return;
     }
 
-    ctx.fillStyle = 'rgba(255, 0, 0, 0.5)';
-    ctx.fillRect(50, 50, 100, 100);
-    ctx.fillStyle = 'white';
-    ctx.font = '14px Arial';
-    ctx.fillText(stickerType, 60, 100);
+    const img = stickerImages[stickerType];
+    if (!img) {
+        showNotification('Error loading sticker image');
+        return;
+    }
+
+    // Default size for stickers - adjust as needed
+    const stickerWidth = 100;
+    const stickerHeight = 100;
+
+    // Center the sticker in the canvas by default
+    const x = (canvas.width - stickerWidth) / 2;
+    const y = (canvas.height - stickerHeight) / 2;
+
+    // Draw the PNG with transparency
+    ctx.drawImage(img, x, y, stickerWidth, stickerHeight);
 
     stickers.push({
         type: stickerType,
-        x: 50,
-        y: 50
+        x: x,
+        y: y,
+        width: stickerWidth,
+        height: stickerHeight
     });
 
     showNotification('Sticker added');
