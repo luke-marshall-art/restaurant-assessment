@@ -1,14 +1,20 @@
 let currentLocation = 'front';
 let stream = null;
 let stickers = [];
+let activeSticker = null;
+let isDragging = false;
+let startX = 0;
+let startY = 0;
+let initialSticker = null;
+const stickerImages = {};
 
-const stickerImages = {};  // Will store our preloaded images
 const video = document.getElementById('videoElement');
 const canvas = document.getElementById('canvas');
 const captureBtn = document.getElementById('captureBtn');
 const saveBtn = document.getElementById('saveBtn');
 const ctx = canvas.getContext('2d');
 
+// Preload sticker images
 window.addEventListener('load', () => {
     const stickerTypes = ['fountain', 'electrical', 'syrup', 'storage'];
     stickerTypes.forEach(type => {
@@ -45,9 +51,9 @@ async function startCamera() {
             stream = await navigator.mediaDevices.getUserMedia({
                 video: true
             });
-            
+
             stream.getTracks().forEach(track => track.stop());
-            
+
             stream = await navigator.mediaDevices.getUserMedia({
                 video: {
                     facingMode: { ideal: "environment" },
@@ -67,7 +73,7 @@ async function startCamera() {
         video.style.display = 'block';
         canvas.style.display = 'none';
         captureBtn.disabled = false;
-        
+
         await new Promise((resolve) => {
             video.onloadedmetadata = () => {
                 resolve();
@@ -84,13 +90,13 @@ async function startCamera() {
 function handleCameraError(err) {
     const errorMessage = err.message || 'Unknown camera error';
     showNotification(errorMessage);
-    
+
     const videoContainer = document.querySelector('.camera-container');
     const existingError = videoContainer.querySelector('.error-message');
     if (existingError) {
         existingError.remove();
     }
-    
+
     const errorDiv = document.createElement('div');
     errorDiv.className = 'error-message';
     errorDiv.innerHTML = `
@@ -108,11 +114,11 @@ function handleCameraError(err) {
 
 function selectLocation(locationType) {
     currentLocation = locationType;
-    document.querySelectorAll('.location-btn').forEach(btn => 
+    document.querySelectorAll('.location-btn').forEach(btn =>
         btn.classList.remove('active'));
-    document.querySelectorAll('.sticker-panel').forEach(panel => 
+    document.querySelectorAll('.sticker-panel').forEach(panel =>
         panel.classList.remove('active'));
-    
+
     event.target.classList.add('active');
     document.querySelector(`.sticker-panel.${locationType}`)
             .classList.add('active');
@@ -130,7 +136,7 @@ function generateFilename() {
         .replace(/[-:]/g, '')
         .replace('T', '-')
         .split('.')[0];
-    
+
     return `${restaurantId}_${locationType}_${timestamp}.png`;
 }
 
@@ -138,7 +144,7 @@ function showNotification(message) {
     const notification = document.getElementById('notification');
     notification.textContent = message;
     notification.style.display = 'block';
-    
+
     setTimeout(() => {
         notification.style.display = 'none';
     }, 3000);
@@ -159,15 +165,17 @@ function capturePhoto() {
         canvas.width = video.videoWidth;
         canvas.height = video.videoHeight;
         ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
-        
+
         stream.getTracks().forEach(track => track.stop());
         stream = null;
-        
+
         video.style.display = 'none';
         canvas.style.display = 'block';
         captureBtn.disabled = true;
         saveBtn.disabled = false;
-        
+
+        setupTouchHandlers();
+
         showNotification('Photo captured! Add stickers or save.');
     } catch (error) {
         console.error('Error capturing photo:', error);
@@ -187,26 +195,27 @@ function addSticker(stickerType) {
         return;
     }
 
-    // Default size for stickers - adjust as needed
+    // Default size for stickers
     const stickerWidth = 100;
     const stickerHeight = 100;
 
-    // Center the sticker in the canvas by default
+    // Center the sticker
     const x = (canvas.width - stickerWidth) / 2;
     const y = (canvas.height - stickerHeight) / 2;
 
-    // Draw the PNG with transparency
-    ctx.drawImage(img, x, y, stickerWidth, stickerHeight);
-
-    stickers.push({
+    const newSticker = {
+        id: Date.now(), // Unique ID for each sticker
         type: stickerType,
         x: x,
         y: y,
         width: stickerWidth,
-        height: stickerHeight
-    });
+        height: stickerHeight,
+        img: img
+    };
 
-    showNotification('Sticker added');
+    stickers.push(newSticker);
+    redrawCanvas();
+    showNotification('Sticker added - tap and hold to move');
 }
 
 function saveImage() {
@@ -220,6 +229,108 @@ function saveImage() {
     link.download = filename;
     link.href = canvas.toDataURL();
     link.click();
-    
+
     showNotification(`Saved as: ${filename}`);
+}
+
+function redrawCanvas() {
+    const photo = ctx.getImageData(0, 0, canvas.width, canvas.height);
+    ctx.putImageData(photo, 0, 0);
+
+    stickers.forEach(sticker => {
+        ctx.drawImage(sticker.img, sticker.x, sticker.y, sticker.width, sticker.height);
+
+        // Draw resize handle
+        ctx.fillStyle = 'white';
+        ctx.strokeStyle = 'black';
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        ctx.arc(sticker.x + sticker.width, sticker.y + sticker.height, 10, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.stroke();
+
+        // Draw delete button
+        ctx.fillStyle = 'red';
+        ctx.beginPath();
+        ctx.arc(sticker.x, sticker.y, 10, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.stroke();
+    });
+}
+
+function setupTouchHandlers() {
+    canvas.addEventListener('touchstart', handleTouchStart, false);
+    canvas.addEventListener('touchmove', handleTouchMove, false);
+    canvas.addEventListener('touchend', handleTouchEnd, false);
+}
+
+function handleTouchStart(evt) {
+    evt.preventDefault();
+    const touch = evt.touches[0];
+    const rect = canvas.getBoundingClientRect();
+    const x = touch.clientX - rect.left;
+    const y = touch.clientY - rect.top;
+
+    // Check if touch is on a sticker
+    stickers.forEach(sticker => {
+        // Check for delete button
+        const deleteDistance = Math.hypot(x - sticker.x, y - sticker.y);
+        if (deleteDistance < 20) {
+            stickers = stickers.filter(s => s.id !== sticker.id);
+            redrawCanvas();
+            return;
+        }
+
+        // Check for resize handle
+        const resizeDistance = Math.hypot(
+            x - (sticker.x + sticker.width),
+            y - (sticker.y + sticker.height)
+        );
+        if (resizeDistance < 20) {
+            activeSticker = sticker;
+            isDragging = false;
+            initialSticker = { ...sticker };
+            startX = x;
+            startY = y;
+            return;
+        }
+
+        // Check for drag
+        if (x >= sticker.x && x <= sticker.x + sticker.width &&
+            y >= sticker.y && y <= sticker.y + sticker.height) {
+            activeSticker = sticker;
+            isDragging = true;
+            startX = x - sticker.x;
+            startY = y - sticker.y;
+        }
+    });
+}
+
+function handleTouchMove(evt) {
+    if (!activeSticker) return;
+    evt.preventDefault();
+
+    const touch = evt.touches[0];
+    const rect = canvas.getBoundingClientRect();
+    const x = touch.clientX - rect.left;
+    const y = touch.clientY - rect.top;
+
+    if (isDragging) {
+        // Handle dragging
+        activeSticker.x = x - startX;
+        activeSticker.y = y - startY;
+    } else {
+        // Handle resizing
+        const newWidth = Math.max(50, Math.abs(x - activeSticker.x));
+        const newHeight = Math.max(50, Math.abs(y - activeSticker.y));
+        activeSticker.width = newWidth;
+        activeSticker.height = newHeight;
+    }
+
+    redrawCanvas();
+}
+
+function handleTouchEnd() {
+    activeSticker = null;
+    isDragging = false;
 }
