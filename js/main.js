@@ -1,189 +1,301 @@
-let currentLocation = 'front';
-let stream = null;
-let stickers = [];
-
-const video = document.getElementById('videoElement');
-const canvas = document.getElementById('canvas');
-const captureBtn = document.getElementById('captureBtn');
-const saveBtn = document.getElementById('saveBtn');
-const ctx = canvas.getContext('2d');
-
-async function startCamera() {
-    try {
-        if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
-            throw new Error('Camera API not supported in this browser. Please try Chrome, Firefox, or Safari.');
-        }
-
-        if (stream) {
-            stream.getTracks().forEach(track => track.stop());
-        }
-
-        try {
-            stream = await navigator.mediaDevices.getUserMedia({
-                video: true
-            });
-            
-            stream.getTracks().forEach(track => track.stop());
-            
-            stream = await navigator.mediaDevices.getUserMedia({
-                video: {
-                    facingMode: { ideal: "environment" },
-                    width: { ideal: 1280 },
-                    height: { ideal: 720 }
-                }
-            });
-        } catch (err) {
-            if (err.name === 'NotAllowedError') {
-                throw new Error('Camera permission denied. Please allow camera access in your browser settings and try again.');
-            } else {
-                throw err;
-            }
-        }
-
-        video.srcObject = stream;
-        video.style.display = 'block';
-        canvas.style.display = 'none';
-        captureBtn.disabled = false;
+// Sticker Class for handling individual stickers
+class DraggableSticker {
+    constructor(imageUrl, container) {
+        this.imageUrl = imageUrl;
+        this.container = container;
+        this.position = { x: 100, y: 100 };
+        this.scale = 1;
+        this.isDragging = false;
+        this.dragStart = { x: 0, y: 0 };
+        this.touchRefs = {
+            initialDistance: 0,
+            initialScale: 1
+        };
         
-        await new Promise((resolve) => {
-            video.onloadedmetadata = () => {
-                resolve();
-            };
+        this.element = this.createStickerElement();
+        this.setupEventListeners();
+    }
+
+    createStickerElement() {
+        const stickerDiv = document.createElement('div');
+        stickerDiv.className = 'sticker';
+        stickerDiv.style.transform = `translate(${this.position.x}px, ${this.position.y}px) scale(${this.scale})`;
+
+        const wrapper = document.createElement('div');
+        wrapper.className = 'sticker-wrapper';
+
+        const img = document.createElement('img');
+        img.src = this.imageUrl;
+        img.alt = 'Sticker';
+        img.draggable = false; // Prevent default drag behavior
+
+        const deleteButton = document.createElement('button');
+        deleteButton.innerHTML = '×';
+        deleteButton.className = 'delete-button';
+
+        wrapper.appendChild(img);
+        wrapper.appendChild(deleteButton);
+        stickerDiv.appendChild(wrapper);
+
+        return stickerDiv;
+    }
+
+    setupEventListeners() {
+        // Mouse events
+        this.element.addEventListener('mousedown', this.handleMouseDown.bind(this));
+        document.addEventListener('mousemove', this.handleMouseMove.bind(this));
+        document.addEventListener('mouseup', this.handleMouseUp.bind(this));
+
+        // Touch events
+        this.element.addEventListener('touchstart', this.handleTouchStart.bind(this));
+        document.addEventListener('touchmove', this.handleTouchMove.bind(this), { passive: false });
+        document.addEventListener('touchend', this.handleMouseUp.bind(this));
+
+        // Delete button
+        const deleteButton = this.element.querySelector('.delete-button');
+        deleteButton.addEventListener('click', () => this.element.remove());
+    }
+
+    handleMouseDown(e) {
+        if (e.target.classList.contains('delete-button')) return;
+        
+        this.isDragging = true;
+        this.dragStart = {
+            x: e.clientX - this.position.x,
+            y: e.clientY - this.position.y
+        };
+        this.element.style.zIndex = '1000';
+    }
+
+    handleMouseMove(e) {
+        if (!this.isDragging) return;
+
+        this.position = {
+            x: e.clientX - this.dragStart.x,
+            y: e.clientY - this.dragStart.y
+        };
+
+        this.updateTransform();
+    }
+
+    handleMouseUp() {
+        this.isDragging = false;
+        this.element.style.zIndex = '';
+    }
+
+    handleTouchStart(e) {
+        if (e.target.classList.contains('delete-button')) return;
+
+        if (e.touches.length === 2) {
+            // Initialize scaling
+            const touch1 = e.touches[0];
+            const touch2 = e.touches[1];
+            this.touchRefs.initialDistance = Math.hypot(
+                touch2.clientX - touch1.clientX,
+                touch2.clientY - touch1.clientY
+            );
+            this.touchRefs.initialScale = this.scale;
+        } else {
+            // Initialize dragging
+            this.handleMouseDown(e.touches[0]);
+        }
+    }
+
+    handleTouchMove(e) {
+        e.preventDefault(); // Prevent screen scrolling while manipulating stickers
+
+        if (e.touches.length === 2) {
+            // Handle scaling
+            const touch1 = e.touches[0];
+            const touch2 = e.touches[1];
+            const distance = Math.hypot(
+                touch2.clientX - touch1.clientX,
+                touch2.clientY - touch1.clientY
+            );
+            this.scale = (distance / this.touchRefs.initialDistance) * this.touchRefs.initialScale;
+            this.scale = Math.min(Math.max(0.5, this.scale), 2); // Limit scale between 0.5 and 2
+            this.updateTransform();
+        } else {
+            // Handle dragging
+            this.handleMouseMove(e.touches[0]);
+        }
+    }
+
+    updateTransform() {
+        this.element.style.transform = `translate(${this.position.x}px, ${this.position.y}px) scale(${this.scale})`;
+    }
+}
+
+// Main Application Class
+class RestaurantAssessment {
+    constructor() {
+        this.initializeElements();
+        this.setupEventListeners();
+        this.initializeCamera();
+        this.currentLocation = 'front';
+        this.setupStickerPalette();
+    }
+
+    initializeElements() {
+        // Camera elements
+        this.video = document.getElementById('camera');
+        this.canvas = document.getElementById('photoCanvas');
+        this.captureBtn = document.getElementById('captureBtn');
+        this.switchCameraBtn = document.getElementById('switchCameraBtn');
+        
+        // Location buttons
+        this.frontHouseBtn = document.getElementById('frontHouse');
+        this.backHouseBtn = document.getElementById('backHouse');
+        
+        // Assessment input
+        this.assessmentInput = document.getElementById('assessmentId');
+        
+        // Sticker container
+        this.stickerContainer = document.querySelector('.sticker-container');
+        
+        // Camera settings
+        this.stream = null;
+        this.facingMode = 'environment';
+    }
+
+    setupEventListeners() {
+        this.captureBtn.addEventListener('click', () => this.capturePhoto());
+        this.switchCameraBtn.addEventListener('click', () => this.switchCamera());
+        this.frontHouseBtn.addEventListener('click', () => this.setLocation('front'));
+        this.backHouseBtn.addEventListener('click', () => this.setLocation('back'));
+        this.assessmentInput.addEventListener('input', (e) => this.handleAssessmentInput(e));
+    }
+
+    setupStickerPalette() {
+        const palette = document.createElement('div');
+        palette.className = 'sticker-palette';
+
+        // Define your sticker images
+        const stickerImages = [
+            'stickers/critical.png',
+            'stickers/major.png',
+            'stickers/minor.png'
+        ];
+
+        stickerImages.forEach(imageUrl => {
+            const button = document.createElement('button');
+            button.className = 'sticker-button';
+
+            const img = document.createElement('img');
+            img.src = imageUrl;
+            img.alt = 'Sticker';
+
+            button.appendChild(img);
+            button.addEventListener('click', () => this.addSticker(imageUrl));
+            palette.appendChild(button);
         });
 
-        showNotification('Camera started successfully');
-    } catch (err) {
-        console.error('Camera error:', err);
-        handleCameraError(err);
-    }
-}
-
-function handleCameraError(err) {
-    const errorMessage = err.message || 'Unknown camera error';
-    showNotification(errorMessage);
-    
-    const videoContainer = document.querySelector('.camera-container');
-    const existingError = videoContainer.querySelector('.error-message');
-    if (existingError) {
-        existingError.remove();
-    }
-    
-    const errorDiv = document.createElement('div');
-    errorDiv.className = 'error-message';
-    errorDiv.innerHTML = `
-        <p><strong>Camera Error:</strong> ${errorMessage}</p>
-        <p>Troubleshooting steps:</p>
-        <ol>
-            <li>Make sure you're using a modern browser (Chrome, Firefox, Safari)</li>
-            <li>Check that camera permissions are allowed in your browser settings</li>
-            <li>If using a mobile device, ensure the site has camera permissions</li>
-            <li>Try reloading the page</li>
-        </ol>
-    `;
-    videoContainer.appendChild(errorDiv);
-}
-
-function selectLocation(locationType) {
-    currentLocation = locationType;
-    document.querySelectorAll('.location-btn').forEach(btn => 
-        btn.classList.remove('active'));
-    document.querySelectorAll('.sticker-panel').forEach(panel => 
-        panel.classList.remove('active'));
-    
-    event.target.classList.add('active');
-    document.querySelector(`.sticker-panel.${locationType}`)
-            .classList.add('active');
-}
-
-function validateInputs() {
-    const restaurantNumber = document.getElementById('restaurantNumber').value;
-    return restaurantNumber.length === 6 && /^\d+$/.test(restaurantNumber);
-}
-
-function generateFilename() {
-    const restaurantId = document.getElementById('restaurantNumber').value;
-    const locationType = currentLocation === 'front' ? 'fountain' : 'syrup';
-    const timestamp = new Date().toISOString()
-        .replace(/[-:]/g, '')
-        .replace('T', '-')
-        .split('.')[0];
-    
-    return `${restaurantId}_${locationType}_${timestamp}.png`;
-}
-
-function showNotification(message) {
-    const notification = document.getElementById('notification');
-    notification.textContent = message;
-    notification.style.display = 'block';
-    
-    setTimeout(() => {
-        notification.style.display = 'none';
-    }, 3000);
-}
-
-function capturePhoto() {
-    if (!validateInputs()) {
-        showNotification('Please enter restaurant number first');
-        return;
+        document.getElementById('camera-container').appendChild(palette);
     }
 
-    if (!stream) {
-        showNotification('Please start the camera first');
-        return;
+    addSticker(imageUrl) {
+        const sticker = new DraggableSticker(imageUrl, this.stickerContainer);
+        this.stickerContainer.appendChild(sticker.element);
     }
 
-    try {
-        canvas.width = video.videoWidth;
-        canvas.height = video.videoHeight;
-        ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+    async initializeCamera() {
+        try {
+            const constraints = {
+                video: {
+                    facingMode: this.facingMode,
+                    width: { ideal: 1920 },
+                    height: { ideal: 1080 }
+                }
+            };
+            
+            this.stream = await navigator.mediaDevices.getUserMedia(constraints);
+            this.video.srcObject = this.stream;
+        } catch (error) {
+            console.error('Camera access denied:', error);
+            // You might want to show an error message to the user here
+        }
+    }
+
+    async switchCamera() {
+        this.facingMode = this.facingMode === 'environment' ? 'user' : 'environment';
         
-        stream.getTracks().forEach(track => track.stop());
-        stream = null;
+        if (this.stream) {
+            this.stream.getTracks().forEach(track => track.stop());
+        }
         
-        video.style.display = 'none';
-        canvas.style.display = 'block';
-        captureBtn.disabled = true;
-        saveBtn.disabled = false;
+        await this.initializeCamera();
+    }
+
+    capturePhoto() {
+        // Set canvas dimensions to match video
+        this.canvas.width = this.video.videoWidth;
+        this.canvas.height = this.video.videoHeight;
+
+        const ctx = this.canvas.getContext('2d');
         
-        showNotification('Photo captured! Add stickers or save.');
-    } catch (error) {
-        console.error('Error capturing photo:', error);
-        showNotification('Error capturing photo. Please try again.');
+        // Draw the video frame
+        ctx.drawImage(this.video, 0, 0);
+
+        // Draw all stickers onto the canvas
+        const stickers = this.stickerContainer.querySelectorAll('.sticker');
+        stickers.forEach(sticker => {
+            const img = sticker.querySelector('img');
+            const transform = new DOMMatrix(window.getComputedStyle(sticker).transform);
+            
+            ctx.save();
+            ctx.setTransform(
+                transform.a,
+                transform.b,
+                transform.c,
+                transform.d,
+                transform.e,
+                transform.f
+            );
+            ctx.drawImage(img, 0, 0, img.width, img.height);
+            ctx.restore();
+        });
+
+        // Generate filename and save
+        const filename = this.generateFilename();
+        this.savePhoto(filename);
+    }
+
+    generateFilename() {
+        const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
+        const location = this.currentLocation === 'front' ? 'FOH' : 'BOH';
+        const assessmentId = this.assessmentInput.value || 'NOID';
+        return `assessment_${assessmentId}_${location}_${timestamp}.jpg`;
+    }
+
+    savePhoto(filename) {
+        // Create a temporary link to download the image
+        const link = document.createElement('a');
+        link.download = filename;
+        link.href = this.canvas.toDataURL('image/jpeg', 0.8);
+        link.click();
+    }
+
+    setLocation(location) {
+        this.currentLocation = location;
+        
+        if (location === 'front') {
+            this.frontHouseBtn.classList.add('active');
+            this.backHouseBtn.classList.remove('active');
+        } else {
+            this.frontHouseBtn.classList.remove('active');
+            this.backHouseBtn.classList.add('active');
+        }
+    }
+
+    handleAssessmentInput(e) {
+        // Limit to 6 digits
+        if (e.target.value.length > 6) {
+            e.target.value = e.target.value.slice(0, 6);
+        }
     }
 }
 
-function addSticker(stickerType) {
-    if (!canvas.getContext) {
-        showNotification('Please take a photo first');
-        return;
-    }
-
-    ctx.fillStyle = 'rgba(255, 0, 0, 0.5)';
-    ctx.fillRect(50, 50, 100, 100);
-    ctx.fillStyle = 'white';
-    ctx.font = '14px Arial';
-    ctx.fillText(stickerType, 60, 100);
-
-    stickers.push({
-        type: stickerType,
-        x: 50,
-        y: 50
-    });
-
-    showNotification('Sticker added');
-}
-
-function saveImage() {
-    if (!validateInputs()) {
-        showNotification('Please enter a valid 6-digit restaurant number');
-        return;
-    }
-
-    const filename = generateFilename();
-    const link = document.createElement('a');
-    link.download = filename;
-    link.href = canvas.toDataURL();
-    link.click();
-    
-    showNotification(`Saved as: ${filename}`);
-}
+// Initialize the application when the DOM is loaded
+document.addEventListener('DOMContentLoaded', () => {
+    new RestaurantAssessment();
+});
