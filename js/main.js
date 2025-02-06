@@ -18,6 +18,19 @@ window.addEventListener('load', () => {
     });
 });
 
+// Add click handlers for stickers
+document.addEventListener('DOMContentLoaded', () => {
+    const stickerItems = document.querySelectorAll('.sticker-item');
+    stickerItems.forEach(item => {
+        item.addEventListener('click', () => {
+            const stickerType = item.getAttribute('data-sticker-type');
+            if (stickerType) {
+                addSticker(stickerType);
+            }
+        });
+    });
+});
+
 async function startCamera() {
     try {
         if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
