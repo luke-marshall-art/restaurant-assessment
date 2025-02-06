@@ -31,7 +31,7 @@ document.addEventListener('DOMContentLoaded', () => {
         item.addEventListener('click', () => {
             const stickerType = item.getAttribute('data-sticker-type');
             if (stickerType) {
-                addSticker(stickerType);
+                toggleSticker(stickerType);
             }
         });
     });
@@ -195,16 +195,18 @@ function addSticker(stickerType) {
         return;
     }
 
-    // Default size for stickers
-    const stickerWidth = 100;
-    const stickerHeight = 100;
+    // Calculate sticker size maintaining aspect ratio
+    const maxWidth = 100; // Maximum width
+    const aspectRatio = img.naturalWidth / img.naturalHeight;
+    const stickerWidth = maxWidth;
+    const stickerHeight = maxWidth / aspectRatio;
 
     // Center the sticker
     const x = (canvas.width - stickerWidth) / 2;
     const y = (canvas.height - stickerHeight) / 2;
 
     const newSticker = {
-        id: Date.now(), // Unique ID for each sticker
+        id: Date.now(),
         type: stickerType,
         x: x,
         y: y,
@@ -326,9 +328,14 @@ function handleTouchMove(evt) {
         activeSticker.x = x - startX;
         activeSticker.y = y - startY;
     } else {
-        // Handle resizing
+        // Handle resizing with aspect ratio
+        const originalAspectRatio = activeSticker.img.naturalWidth / activeSticker.img.naturalHeight;
+
+        // Calculate new width based on drag position
         const newWidth = Math.max(50, Math.abs(x - activeSticker.x));
-        const newHeight = Math.max(50, Math.abs(y - activeSticker.y));
+        // Calculate height to maintain aspect ratio
+        const newHeight = newWidth / originalAspectRatio;
+
         activeSticker.width = newWidth;
         activeSticker.height = newHeight;
     }
@@ -339,4 +346,19 @@ function handleTouchMove(evt) {
 function handleTouchEnd() {
     activeSticker = null;
     isDragging = false;
+}
+
+function toggleSticker(stickerType) {
+    // Check if this type of sticker already exists
+    const existingSticker = stickers.find(s => s.type === stickerType);
+
+    if (existingSticker) {
+        // Remove the sticker if it exists
+        stickers = stickers.filter(s => s.type !== stickerType);
+        redrawCanvas();
+        showNotification('Sticker removed');
+    } else {
+        // Add new sticker if it doesn't exist
+        addSticker(stickerType);
+    }
 }
