@@ -334,3 +334,27 @@ function handleTouchEnd() {
     activeSticker = null;
     isDragging = false;
 }
+
+function handleTouchStart(evt) {
+    console.log('Touch started');  // Add this line
+    evt.preventDefault();
+    const touch = evt.touches[0];
+    const rect = canvas.getBoundingClientRect();
+    const x = touch.clientX - rect.left;
+    const y = touch.clientY - rect.top;
+    console.log('Touch coordinates:', x, y);  // Add this line
+
+function addSticker(stickerType) {
+    console.log('Adding sticker:', stickerType);  // Add this line
+    if (!canvas.getContext) {
+        console.log('No canvas context');  // Add this line
+        showNotification('Please take a photo first');
+        return;
+    }
+
+    function setupTouchHandlers() {
+    console.log('Setting up touch handlers');  // Add this line
+    canvas.addEventListener('touchstart', handleTouchStart, false);
+    canvas.addEventListener('touchmove', handleTouchMove, false);
+    canvas.addEventListener('touchend', handleTouchEnd, false);
+}
