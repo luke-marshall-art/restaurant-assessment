@@ -1,79 +1,44 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <title>Restaurant Site Assessment</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Restaurant Assessment Tool</title>
     <link rel="stylesheet" href="css/styles.css">
 </head>
 <body>
     <div class="container">
-        <div class="instructions">
-            <h3>Assessment Instructions</h3>
-            <ol>
-                <li>Enter 6-digit restaurant number</li>
-                <li>Select location type (Front/Back of House)</li>
-                <li>Take photo of proposed location</li>
-                <li>Add appropriate equipment stickers</li>
-                <li>Save with auto-generated filename</li>
-            </ol>
+        <div class="location-selector">
+            <button id="frontHouse" class="location-btn active">Front of House</button>
+            <button id="backHouse" class="location-btn">Back of House</button>
         </div>
 
-        <div class="input-group">
-            <input type="number" id="restaurantNumber" class="input-field" 
-                   placeholder="Restaurant Number" pattern="\d{6}" 
-                   title="6-digit restaurant number">
+        <div id="camera-container" class="camera-wrapper">
+            <video id="camera-feed" autoplay playsinline></video>
+            <canvas id="photo-canvas" style="display: none;"></canvas>
             
-            <div class="location-selector">
-                <button class="location-btn active" onclick="selectLocation('front')">
-                    Front of House (Fountain)
-                </button>
-                <button class="location-btn" onclick="selectLocation('back')">
-                    Back of House (Syrup)
-                </button>
+            <!-- Sticker Container -->
+            <div id="sticker-container" class="sticker-container">
+                <!-- Stickers will be added here dynamically -->
             </div>
-        </div>
 
-        <div class="camera-container">
-            <video id="videoElement" autoplay playsinline></video>
-            <canvas id="canvas"></canvas>
+            <!-- Sticker Palette -->
+            <div id="sticker-palette" class="sticker-palette">
+                <div class="sticker-btn" data-sticker="warning">⚠️</div>
+                <div class="sticker-btn" data-sticker="critical">❗</div>
+                <div class="sticker-btn" data-sticker="good">✅</div>
+            </div>
+
             <div class="camera-controls">
-                <button class="btn" onclick="startCamera()">
-                    <i class="fas fa-camera"></i> Start Camera
-                </button>
-                <button class="btn" onclick="capturePhoto()" disabled id="captureBtn">
-                    <i class="fas fa-camera"></i> Take Photo
-                </button>
-                <button class="btn" onclick="saveImage()" disabled id="saveBtn">
-                    <i class="fas fa-save"></i> Save Image
-                </button>
+                <button id="capture-btn" class="btn">Take Photo</button>
+                <button id="switch-camera" class="btn">Switch Camera</button>
             </div>
         </div>
 
-        <div class="sticker-picker">
-            <div class="sticker-panel front active">
-                <h3>Fountain Machine Markers</h3>
-                <div class="sticker-grid">
-                    <img src="/api/placeholder/100/100" alt="Fountain Marker" class="sticker-item" 
-                         onclick="addSticker('fountain')">
-                    <img src="/api/placeholder/100/100" alt="Electrical Mark" class="sticker-item" 
-                         onclick="addSticker('electrical')">
-                </div>
-            </div>
-
-            <div class="sticker-panel back">
-                <h3>Syrup Rack Markers</h3>
-                <div class="sticker-grid">
-                    <img src="/api/placeholder/100/100" alt="Syrup Rack" class="sticker-item" 
-                         onclick="addSticker('syrup')">
-                    <img src="/api/placeholder/100/100" alt="Storage Mark" class="sticker-item" 
-                         onclick="addSticker('storage')">
-                </div>
-            </div>
+        <div class="assessment-input">
+            <input type="number" id="assessment-id" placeholder="Enter 6-digit assessment number" maxlength="6">
         </div>
     </div>
-
-    <div class="notification" id="notification"></div>
-
     <script src="js/main.js"></script>
 </body>
 </html>
