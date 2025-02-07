@@ -195,11 +195,11 @@ function addSticker(stickerType) {
         return;
     }
 
-    // Calculate sticker size maintaining aspect ratio
-    const maxWidth = 100; // Maximum width
+    // Calculate initial sticker size as 50% of canvas width
+    const targetWidth = canvas.width * 0.5;
     const aspectRatio = img.naturalWidth / img.naturalHeight;
-    const stickerWidth = maxWidth;
-    const stickerHeight = maxWidth / aspectRatio;
+    const stickerWidth = targetWidth;
+    const stickerHeight = targetWidth / aspectRatio;
 
     // Center the sticker
     const x = (canvas.width - stickerWidth) / 2;
@@ -217,7 +217,7 @@ function addSticker(stickerType) {
 
     stickers.push(newSticker);
     redrawCanvas();
-    showNotification('Sticker added - tap and hold to move');
+    showNotification('Sticker added - tap and hold to move, drag corner to resize');
 }
 
 function saveImage() {
@@ -248,21 +248,46 @@ function redrawCanvas() {
     stickers.forEach(sticker => {
         ctx.drawImage(sticker.img, sticker.x, sticker.y, sticker.width, sticker.height);
 
-        // Draw resize handle
-        ctx.fillStyle = 'white';
+        // Draw resize handle - new diagonal arrow style
+        ctx.save();
+        ctx.translate(sticker.x + sticker.width, sticker.y + sticker.height);
+        ctx.rotate(Math.PI / 4); // 45-degree rotation
+
+        // Draw white arrow with black outline
         ctx.strokeStyle = 'black';
-        ctx.lineWidth = 2;
+        ctx.lineWidth = 3;
+        ctx.fillStyle = 'white';
+
+        // Draw bidirectional arrow
+        const arrowSize = 20;
+        // Arrow body
         ctx.beginPath();
-        ctx.arc(sticker.x + sticker.width, sticker.y + sticker.height, 10, 0, Math.PI * 2);
+        ctx.moveTo(-arrowSize/2, 0);
+        ctx.lineTo(arrowSize/2, 0);
+        ctx.lineWidth = 4;
+        ctx.stroke();
+
+        // Arrow heads
+        const headSize = 8;
+        // Left arrow head
+        ctx.beginPath();
+        ctx.moveTo(-arrowSize/2, 0);
+        ctx.lineTo(-arrowSize/2 + headSize, -headSize/2);
+        ctx.lineTo(-arrowSize/2 + headSize, headSize/2);
+        ctx.closePath();
         ctx.fill();
         ctx.stroke();
 
-        // Draw delete button
-        ctx.fillStyle = 'red';
+        // Right arrow head
         ctx.beginPath();
-        ctx.arc(sticker.x, sticker.y, 10, 0, Math.PI * 2);
+        ctx.moveTo(arrowSize/2, 0);
+        ctx.lineTo(arrowSize/2 - headSize, -headSize/2);
+        ctx.lineTo(arrowSize/2 - headSize, headSize/2);
+        ctx.closePath();
         ctx.fill();
         ctx.stroke();
+
+        ctx.restore();
     });
 }
 
@@ -281,14 +306,6 @@ function handleTouchStart(evt) {
 
     // Check if touch is on a sticker
     stickers.forEach(sticker => {
-        // Check for delete button
-        const deleteDistance = Math.hypot(x - sticker.x, y - sticker.y);
-        if (deleteDistance < 20) {
-            stickers = stickers.filter(s => s.id !== sticker.id);
-            redrawCanvas();
-            return;
-        }
-
         // Check for resize handle
         const resizeDistance = Math.hypot(
             x - (sticker.x + sticker.width),
@@ -303,7 +320,7 @@ function handleTouchStart(evt) {
             return;
         }
 
-        // Check for drag queen haha
+        // Check for drag
         if (x >= sticker.x && x <= sticker.x + sticker.width &&
             y >= sticker.y && y <= sticker.y + sticker.height) {
             activeSticker = sticker;
