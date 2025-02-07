@@ -6,6 +6,7 @@ let isDragging = false;
 let startX = 0;
 let startY = 0;
 let initialSticker = null;
+let basePhoto = null;
 const stickerImages = {};
 
 const video = document.getElementById('videoElement');
@@ -178,37 +179,41 @@ function showNotification(message) {
 }
 
 function capturePhoto() {
-   if (!validateInputs()) {
-       showNotification('Please enter restaurant number first');
-       return;
-   }
+    if (!validateInputs()) {
+        showNotification('Please enter restaurant number first');
+        return;
+    }
 
-   if (!stream) {
-       showNotification('Please start the camera first');
-       return;
-   }
+    if (!stream) {
+        showNotification('Please start the camera first');
+        return;
+    }
 
-   try {
-       canvas.width = video.videoWidth;
-       canvas.height = video.videoHeight;
-       ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+    try {
+        canvas.width = video.videoWidth;
+        canvas.height = video.videoHeight;
+        ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
 
-       stream.getTracks().forEach(track => track.stop());
-       stream = null;
+        // Store the base photo data
+        basePhoto = canvas.toDataURL('image/png');
 
-       video.style.display = 'none';
-       canvas.style.display = 'block';
-       captureBtn.disabled = true;
-       saveBtn.disabled = false;
+        stream.getTracks().forEach(track => track.stop());
+        stream = null;
 
-       setupTouchHandlers();
+        video.style.display = 'none';
+        canvas.style.display = 'block';
+        captureBtn.disabled = true;
+        saveBtn.disabled = false;
 
-       showNotification('Photo captured! Add stickers or save.');
-   } catch (error) {
-       console.error('Error capturing photo:', error);
-       showNotification('Error capturing photo. Please try again.');
-   }
+        setupTouchHandlers();
+
+        showNotification('Photo captured! Add stickers or save.');
+    } catch (error) {
+        console.error('Error capturing photo:', error);
+        showNotification('Error capturing photo. Please try again.');
+    }
 }
+
 
 function addSticker(stickerType) {
     if (!canvas.getContext) {
@@ -263,49 +268,55 @@ function saveImage() {
 }
 
 function redrawCanvas() {
-   ctx.clearRect(0, 0, canvas.width, canvas.height);
+    if (!basePhoto) return;
 
-   const photo = new Image();
-   photo.src = canvas.toDataURL();
-   ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-   stickers.forEach(sticker => {
-       ctx.drawImage(sticker.img, sticker.x, sticker.y, sticker.width, sticker.height);
+    // Draw the stored base photo
+    const photo = new Image();
+    photo.onload = () => {
+        ctx.drawImage(photo, 0, 0, canvas.width, canvas.height);
 
-       ctx.save();
-       ctx.translate(sticker.x + sticker.width, sticker.y + sticker.height);
-       ctx.rotate(Math.PI / 4);
+        // Draw all stickers
+        stickers.forEach(sticker => {
+            ctx.drawImage(sticker.img, sticker.x, sticker.y, sticker.width, sticker.height);
 
-       ctx.strokeStyle = 'black';
-       ctx.lineWidth = 6;
-       ctx.fillStyle = 'white';
+            ctx.save();
+            ctx.translate(sticker.x + sticker.width, sticker.y + sticker.height);
+            ctx.rotate(Math.PI / 4);
 
-       const arrowSize = 60;
-       ctx.beginPath();
-       ctx.moveTo(-arrowSize/2, 0);
-       ctx.lineTo(arrowSize/2, 0);
-       ctx.lineWidth = 8;
-       ctx.stroke();
+            ctx.strokeStyle = 'black';
+            ctx.lineWidth = 6;
+            ctx.fillStyle = 'white';
 
-       const headSize = 24;
-       ctx.beginPath();
-       ctx.moveTo(-arrowSize/2, 0);
-       ctx.lineTo(-arrowSize/2 + headSize, -headSize/2);
-       ctx.lineTo(-arrowSize/2 + headSize, headSize/2);
-       ctx.closePath();
-       ctx.fill();
-       ctx.stroke();
+            const arrowSize = 60;
+            ctx.beginPath();
+            ctx.moveTo(-arrowSize/2, 0);
+            ctx.lineTo(arrowSize/2, 0);
+            ctx.lineWidth = 8;
+            ctx.stroke();
 
-       ctx.beginPath();
-       ctx.moveTo(arrowSize/2, 0);
-       ctx.lineTo(arrowSize/2 - headSize, -headSize/2);
-       ctx.lineTo(arrowSize/2 - headSize, headSize/2);
-       ctx.closePath();
-       ctx.fill();
-       ctx.stroke();
+            const headSize = 24;
+            ctx.beginPath();
+            ctx.moveTo(-arrowSize/2, 0);
+            ctx.lineTo(-arrowSize/2 + headSize, -headSize/2);
+            ctx.lineTo(-arrowSize/2 + headSize, headSize/2);
+            ctx.closePath();
+            ctx.fill();
+            ctx.stroke();
 
-       ctx.restore();
-   });
+            ctx.beginPath();
+            ctx.moveTo(arrowSize/2, 0);
+            ctx.lineTo(arrowSize/2 - headSize, -headSize/2);
+            ctx.lineTo(arrowSize/2 - headSize, headSize/2);
+            ctx.closePath();
+            ctx.fill();
+            ctx.stroke();
+
+            ctx.restore();
+        });
+    };
+    photo.src = basePhoto;
 }
 
 function setupTouchHandlers() {
