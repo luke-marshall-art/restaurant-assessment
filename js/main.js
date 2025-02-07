@@ -31,15 +31,23 @@ window.addEventListener('load', () => {
     // Load Front of House stickers
     frontStickers.forEach(type => {
         const img = new Image();
-        img.src = `images/Front of House/${type}.png`;
+        // Encode the URL to handle spaces correctly
+        img.src = encodeURI(`images/Front of House/${type}.png`);
         stickerImages[type] = img;
+        // Add error handling to debug loading issues
+        img.onerror = () => {
+            console.error(`Failed to load image: ${type}`);
+        };
     });
 
     // Load Back of House stickers
     backStickers.forEach(type => {
         const img = new Image();
-        img.src = `images/Back of House/${type}.png`;
+        img.src = encodeURI(`images/Back of House/${type}.png`);
         stickerImages[type] = img;
+        img.onerror = () => {
+            console.error(`Failed to load image: ${type}`);
+        };
     });
 });
 
