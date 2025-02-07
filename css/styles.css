@@ -22,12 +22,27 @@ body {
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
 }
 
+.main-title {
+    text-align: center;
+    color: var(--primary-color);
+    font-size: 28px;
+    margin-bottom: 32px;
+    padding-bottom: 16px;
+    border-bottom: 2px solid #eee;
+}
+
 .instructions {
     background: #f8f9fa;
     padding: 20px;
     border-radius: 12px;
     margin: 15px 0;
     border-left: 4px solid var(--primary-color);
+}
+
+.instructions-title {
+    text-align: center;
+    margin-bottom: 20px;
+    color: #333;
 }
 
 .input-group {
@@ -39,13 +54,25 @@ body {
 }
 
 .input-field {
-    padding: 12px 20px;
-    border: 2px solid #e0e0e0;
+    padding: 16px 24px;
+    border: 2px solid var(--primary-color);
     border-radius: 12px;
-    font-size: 16px;
-    width: 240px;
+    font-size: 18px;
+    width: 280px;
     text-align: center;
-    transition: border-color 0.3s ease;
+    transition: all 0.3s ease;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.input-field:focus {
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 4px rgba(0, 102, 204, 0.1);
+    outline: none;
+}
+
+.input-field::placeholder {
+    color: #666;
+    font-size: 16px;
 }
 
 .location-selector {
@@ -112,6 +139,7 @@ body {
     display: inline-flex;
     align-items: center;
     gap: 8px;
+    transition: all 0.3s ease;
 }
 
 .btn:hover {
@@ -124,19 +152,6 @@ body {
     opacity: 0.7;
 }
 
-.notification {
-    position: fixed;
-    bottom: 20px;
-    left: 50%;
-    transform: translateX(-50%);
-    padding: 15px 25px;
-    background: #333;
-    color: white;
-    border-radius: 8px;
-    display: none;
-    z-index: 1000;
-}
-
 .sticker-panel {
     display: none;
 }
@@ -145,15 +160,31 @@ body {
     display: block;
 }
 
-.sticker-picker {
-    margin-top: 32px;
+.sticker-section-title {
+    text-align: center;
+    font-size: 24px;
+    color: #333;
+    margin: 32px 0 24px;
+}
+
+.sticker-row {
+    margin-bottom: 40px;
+}
+
+.sticker-row-title {
+    text-align: center;
+    font-size: 18px;
+    color: #666;
+    margin-bottom: 16px;
+    padding-bottom: 8px;
+    border-bottom: 1px solid #eee;
 }
 
 .sticker-grid {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
     gap: 24px;
-    padding: 24px;
+    padding: 16px;
     max-width: 600px;
     margin: 0 auto;
 }
@@ -174,6 +205,19 @@ body {
     background: white;
     transform: translateY(-2px);
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.notification {
+    position: fixed;
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    padding: 15px 25px;
+    background: #333;
+    color: white;
+    border-radius: 8px;
+    display: none;
+    z-index: 1000;
 }
 
 .error-message {

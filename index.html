@@ -7,8 +7,10 @@
 </head>
 <body>
     <div class="container">
+        <h1 class="main-title">Fountain - Site Photo Helper</h1>
+
         <div class="instructions">
-            <h3>Assessment Instructions</h3>
+            <h3 class="instructions-title">Assessment Instructions</h3>
             <ol>
                 <li>Enter 6-digit restaurant number</li>
                 <li>Select location type (Front/Back of House)</li>
@@ -19,10 +21,10 @@
         </div>
 
         <div class="input-group">
-            <input type="number" id="restaurantNumber" class="input-field" 
-                   placeholder="Restaurant Number" pattern="\d{6}" 
+            <input type="number" id="restaurantNumber" class="input-field"
+                   placeholder="Restaurant Number" pattern="\d{6}"
                    title="6-digit restaurant number">
-            
+
             <div class="location-selector">
                 <button class="location-btn active" onclick="selectLocation('front')">
                     Front of House (Fountain)
@@ -49,56 +51,83 @@
             </div>
         </div>
 
+        <div class="sticker-picker">
+            <div class="sticker-panel front active">
+                <h3 class="sticker-section-title">Fountain Machine Markers</h3>
 
+                <div class="sticker-row">
+                    <h4 class="sticker-row-title">4 Valve Fountain</h4>
+                    <div class="sticker-grid">
+                        <img src="images/Front of House/CED400_CRF_FR.png" alt="Front View" class="sticker-item"
+                             data-sticker-type="CED400_CRF_FR">
+                        <img src="images/Front of House/CED400_CRF_PL.png" alt="Left Side" class="sticker-item"
+                             data-sticker-type="CED400_CRF_PL">
+                        <img src="images/Front of House/CED400_CRF_PR.png" alt="Right Side" class="sticker-item"
+                             data-sticker-type="CED400_CRF_PR">
+                    </div>
+                </div>
 
-<div class="sticker-picker">
-    <div class="sticker-panel front active">
-        <h3>Fountain Machine Markers</h3>
-        <div class="sticker-grid">
-            <img src="images/Front of House/CED400_CRF_FR.png" alt="4 Valve Fountain" class="sticker-item"
-                 data-sticker-type="CED400_CRF_FR">
-             <img src="images/Front of House/CED400_CRF_PL.png" alt="4 Valve Fountain" class="sticker-item"
-                 data-sticker-type="CED400_CRF_PL">
-             <img src="images/Front of House/CED400_CRF_PR.png" alt="4 Valve Fountain" class="sticker-item"
-                 data-sticker-type="CED400_CRF_PR">
-             <img src="images/Front of House/Delta600_CRF_FR.png" alt="6 Valve Fountain" class="sticker-item"
-                 data-sticker-type="Delta600_CRF_FR">
-             <img src="images/Front of House/Delta600_CRF_PL.png" alt="6 Valve Fountain" class="sticker-item"
-                 data-sticker-type="Delta600_CRF_PL">
-             <img src="images/Front of House/Delta600_CRF_PR.png" alt="6 Valve Fountain" class="sticker-item"
-                 data-sticker-type="Delta600_CRF_PR">
+                <div class="sticker-row">
+                    <h4 class="sticker-row-title">6 Valve Fountain</h4>
+                    <div class="sticker-grid">
+                        <img src="images/Front of House/Delta600_CRF_FR.png" alt="Front View" class="sticker-item"
+                             data-sticker-type="Delta600_CRF_FR">
+                        <img src="images/Front of House/Delta600_CRF_PL.png" alt="Left Side" class="sticker-item"
+                             data-sticker-type="Delta600_CRF_PL">
+                        <img src="images/Front of House/Delta600_CRF_PR.png" alt="Right Side" class="sticker-item"
+                             data-sticker-type="Delta600_CRF_PR">
+                    </div>
+                </div>
+            </div>
 
+            <div class="sticker-panel back">
+                <h3 class="sticker-section-title">BIB Rack Markers</h3>
+
+                <div class="sticker-row">
+                    <h4 class="sticker-row-title">Low 6-BIB Rack</h4>
+                    <div class="sticker-grid">
+                        <img src="images/Back of House/Low_6BIB_CRF_FR.png" alt="Front View" class="sticker-item"
+                             data-sticker-type="Low_6BIB_CRF_FR">
+                        <img src="images/Back of House/Low_6BIB_CRF_PL.png" alt="Left Side" class="sticker-item"
+                             data-sticker-type="Low_6BIB_CRF_PL">
+                        <img src="images/Back of House/Low_6BIB_CRF_PR.png" alt="Right Side" class="sticker-item"
+                             data-sticker-type="Low_6BIB_CRF_PR">
+                    </div>
+                </div>
+
+                <div class="sticker-row">
+                    <h4 class="sticker-row-title">Mid 6-BIB Rack</h4>
+                    <div class="sticker-grid">
+                        <img src="images/Back of House/Mid_6BIB_CRF_FR.png" alt="Front View" class="sticker-item"
+                             data-sticker-type="Mid_6BIB_CRF_FR">
+                        <img src="images/Back of House/Mid_6BIB_CRF_PL.png" alt="Left Side" class="sticker-item"
+                             data-sticker-type="Mid_6BIB_CRF_PL">
+                        <img src="images/Back of House/Mid_6BIB_CRF_PR.png" alt="Right Side" class="sticker-item"
+                             data-sticker-type="Mid_6BIB_CRF_PR">
+                    </div>
+                </div>
+
+                <div class="sticker-row">
+                    <h4 class="sticker-row-title">Tall 6-BIB Rack</h4>
+                    <div class="sticker-grid">
+                        <img src="images/Back of House/Tall_6BIB_CRF_FR.png" alt="Front View" class="sticker-item"
+                             data-sticker-type="Tall_6BIB_CRF_FR">
+                        <img src="images/Back of House/Tall_6BIB_CRF_PL.png" alt="Left Side" class="sticker-item"
+                             data-sticker-type="Tall_6BIB_CRF_PL">
+                        <img src="images/Back of House/Tall_6BIB_CRF_PR.png" alt="Right Side" class="sticker-item"
+                             data-sticker-type="Tall_6BIB_CRF_PR">
+                    </div>
+                </div>
+
+                <div class="sticker-row">
+                    <h4 class="sticker-row-title">Utilities</h4>
+                    <div class="sticker-grid">
+                        <img src="images/Back of House/BIB_Utilities_CRF_FR.png" alt="Utilities" class="sticker-item"
+                             data-sticker-type="BIB_Utilities_CRF_FR">
+                    </div>
+                </div>
+            </div>
         </div>
-    </div>
-
-    <div class="sticker-panel back">
-        <h3>BIB Rack Markers</h3>
-        <div class="sticker-grid">
-            <img src="images/Back of House/Low_6BIB_CRF_FR.png" alt="Low 6-BIB Rack" class="sticker-item"
-                 data-sticker-type="Low_6BIB_CRF_FR">
-            <img src="images/Back of House/Low_6BIB_CRF_PL.png" alt="Low 6-BIB Rack" class="sticker-item"
-                 data-sticker-type="Low_6BIB_CRF_PL">
-            <img src="images/Back of House/Low_6BIB_CRF_PR.png" alt="Low 6-BIB Rack" class="sticker-item"
-                 data-sticker-type="Low_6BIB_CRF_PR">
-             <img src="images/Back of House/Mid_6BIB_CRF_FR.png" alt="Mid 6-BIB Rack" class="sticker-item"
-                 data-sticker-type="Mid_6BIB_CRF_FR">
-            <img src="images/Back of House/Mid_6BIB_CRF_PL.png" alt="Mid 6-BIB Rack" class="sticker-item"
-                 data-sticker-type="Mid_6BIB_CRF_PL">
-            <img src="images/Back of House/Mid_6BIB_CRF_PR.png" alt="Mid 6-BIB Rack" class="sticker-item"
-                 data-sticker-type="Mid_6BIB_CRF_PR">
-             <img src="images/Back of House/Tall_6BIB_CRF_FR.png" alt="Tall 6-BIB Rack" class="sticker-item"
-                 data-sticker-type="Tall_6BIB_CRF_FR">
-            <img src="images/Back of House/Tall_6BIB_CRF_PL.png" alt="Tall 6-BIB Rack" class="sticker-item"
-                 data-sticker-type="Tall_6BIB_CRF_PL">
-            <img src="images/Back of House/Tall_6BIB_CRF_PR.png" alt="Tall 6-BIB Rack" class="sticker-item"
-                 data-sticker-type="Tall_6BIB_CRF_PR">
-            <img src="images/Back of House/BIB_Utilities_CRF_FR.png" alt="BIB Rack Utilities" class="sticker-item"
-                 data-sticker-type="BIB_Utilities_CRF_FR">
-
-
-        </div>
-    </div>
-</div>
     </div>
 
     <div class="notification" id="notification"></div>
