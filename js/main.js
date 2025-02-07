@@ -16,10 +16,10 @@ const ctx = canvas.getContext('2d');
 
 // Preload sticker images
 window.addEventListener('load', () => {
-    const stickerTypes = ['fountain', 'electrical', 'syrup', 'storage'];
+    const stickerTypes = ['6valve', 'Low_6BIB', 'Mid_6BIB', 'Tall_6BIB'];
     stickerTypes.forEach(type => {
         const img = new Image();
-        img.src = `images/${type}-marker.png`;
+        img.src = `images/${type}.png`;
         stickerImages[type] = img;
     });
 });
