@@ -16,10 +16,29 @@ const ctx = canvas.getContext('2d');
 
 // Preload sticker images
 window.addEventListener('load', () => {
-    const stickerTypes = ['CED400_CRF_FR', 'CED400_CRF_PL', 'CED400_CRF_PR', 'Delta600_CRF_FR', 'Delta600_CRF_PL', 'Delta600_CRF_PR', 'Low_6BIB_CRF_FR', 'Low_6BIB_CRF_PL', 'Low_6BIB_CRF_PR', 'Mid_6BIB_CRF_FR', 'Mid_6BIB_CRF_PL', 'Mid_6BIB_CRF_PR', 'Tall_6BIB_CRF_FR', 'Tall_6BIB_CRF_PL', 'Tall_6BIB_CRF_PR', 'BIB_Utilities_CRF_FR'];
-    stickerTypes.forEach(type => {
+    const frontStickers = [
+        'CED400_CRF_FR', 'CED400_CRF_PL', 'CED400_CRF_PR',
+        'Delta600_CRF_FR', 'Delta600_CRF_PL', 'Delta600_CRF_PR'
+    ];
+
+    const backStickers = [
+        'Low_6BIB_CRF_FR', 'Low_6BIB_CRF_PL', 'Low_6BIB_CRF_PR',
+        'Mid_6BIB_CRF_FR', 'Mid_6BIB_CRF_PL', 'Mid_6BIB_CRF_PR',
+        'Tall_6BIB_CRF_FR', 'Tall_6BIB_CRF_PL', 'Tall_6BIB_CRF_PR',
+        'BIB_Utilities_CRF_FR'
+    ];
+
+    // Load Front of House stickers
+    frontStickers.forEach(type => {
         const img = new Image();
-        img.src = `images/${type}.png`;
+        img.src = `images/Front of House/${type}.png`;
+        stickerImages[type] = img;
+    });
+
+    // Load Back of House stickers
+    backStickers.forEach(type => {
+        const img = new Image();
+        img.src = `images/Back of House/${type}.png`;
         stickerImages[type] = img;
     });
 });
@@ -184,38 +203,40 @@ function capturePhoto() {
 }
 
 function addSticker(stickerType) {
-   if (!canvas.getContext) {
-       showNotification('Please take a photo first');
-       return;
-   }
+    if (!canvas.getContext) {
+        showNotification('Please take a photo first');
+        return;
+    }
 
-   const img = stickerImages[stickerType];
-   if (!img) {
-       showNotification('Error loading sticker image');
-       return;
-   }
+    const img = stickerImages[stickerType];
+    if (!img) {
+        showNotification('Error loading sticker image');
+        return;
+    }
 
-   const targetWidth = canvas.width * 0.75;
-   const aspectRatio = img.naturalWidth / img.naturalHeight;
-   const stickerWidth = targetWidth;
-   const stickerHeight = targetWidth / aspectRatio;
+    // Adjust to 50% of canvas width for initial size
+    const targetWidth = canvas.width * 0.5;
+    const aspectRatio = img.naturalWidth / img.naturalHeight;
+    const stickerWidth = targetWidth;
+    const stickerHeight = targetWidth / aspectRatio;
 
-   const x = (canvas.width - stickerWidth) / 2;
-   const y = (canvas.height - stickerHeight) / 2;
+    // Center both horizontally and vertically
+    const x = Math.max(0, (canvas.width - stickerWidth) / 2);
+    const y = Math.max(0, (canvas.height - stickerHeight) / 2);
 
-   const newSticker = {
-       id: Date.now(),
-       type: stickerType,
-       x: x,
-       y: y,
-       width: stickerWidth,
-       height: stickerHeight,
-       img: img
-   };
+    const newSticker = {
+        id: Date.now(),
+        type: stickerType,
+        x: x,
+        y: y,
+        width: stickerWidth,
+        height: stickerHeight,
+        img: img
+    };
 
-   stickers.push(newSticker);
-   redrawCanvas();
-   showNotification('Sticker added - tap and hold to move, drag corner to resize');
+    stickers.push(newSticker);
+    redrawCanvas();
+    showNotification('Sticker added - tap and hold to move, drag corner to resize');
 }
 
 function saveImage() {
