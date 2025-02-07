@@ -16,7 +16,7 @@ const ctx = canvas.getContext('2d');
 
 // Preload sticker images
 window.addEventListener('load', () => {
-    const stickerTypes = ['6Valve_PL', 'Low_6BIB_PL', 'Mid_6BIB_PL', 'Tall_6BIB_PL'];
+    const stickerTypes = ['CED400_CRF_FR', 'CED400_CRF_PL', 'CED400_CRF_PR', 'Delta600_CRF_FR', 'Delta600_CRF_PL', 'Delta600_CRF_PR', 'Low_6BIB_CRF_FR', 'Low_6BIB_CRF_PL', 'Low_6BIB_CRF_PR', 'Mid_6BIB_CRF_FR', 'Mid_6BIB_CRF_PL', 'Mid_6BIB_CRF_PR', 'Tall_6BIB_CRF_FR', 'Tall_6BIB_CRF_PL', 'Tall_6BIB_CRF_PR', 'BIB_Utilities_CRF_FR'];
     stickerTypes.forEach(type => {
         const img = new Image();
         img.src = `images/${type}.png`;
