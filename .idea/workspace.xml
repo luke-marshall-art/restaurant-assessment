@@ -4,7 +4,22 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="9216abb5-7ec9-4098-87d9-8af4e0b5b927" name="Changes" comment="" />
+    <list default="true" id="9216abb5-7ec9-4098-87d9-8af4e0b5b927" name="Changes" comment="">
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/images/6Valve_PL.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/images/Backup/400x400electrical-marker.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/images/Backup/400x400fountain-marker.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/images/Backup/OGstorage-marker.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/images/Backup/OGsyrup-marker.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/images/Backup/electrical-marker.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/images/Backup/fountain-marker.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/images/Backup/storage-marker.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/images/Backup/syrup-marker.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/images/Low_6BIB_PL.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/images/Mid_6BIB_PL.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/images/Tall_6BIB_PL.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/js/main.js" beforeDir="false" afterPath="$PROJECT_DIR$/js/main.js" afterDir="false" />
+    </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -13,20 +28,20 @@
   <component name="Git.Settings">
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
   </component>
-  <component name="ProjectColorInfo"><![CDATA[{
-  "associatedIndex": 3
-}]]></component>
+  <component name="ProjectColorInfo">{
+  &quot;associatedIndex&quot;: 3
+}</component>
   <component name="ProjectId" id="2seQyaX5qOQbdVnWNd2iXEKpfC5" />
   <component name="ProjectViewState">
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent"><![CDATA[{
-  "keyToString": {
-    "RunOnceActivity.ShowReadmeOnStart": "true",
-    "git-widget-placeholder": "main"
+  <component name="PropertiesComponent">{
+  &quot;keyToString&quot;: {
+    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
+    &quot;git-widget-placeholder&quot;: &quot;main&quot;
   }
-}]]></component>
+}</component>
   <component name="SharedIndexes">
     <attachedChunks>
       <set>

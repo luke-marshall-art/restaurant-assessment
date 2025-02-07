@@ -1,3 +1,6 @@
+Here's the complete updated main.js:
+
+```javascript
 let currentLocation = 'front';
 let stream = null;
 let stickers = [];
@@ -14,28 +17,61 @@ const captureBtn = document.getElementById('captureBtn');
 const saveBtn = document.getElementById('saveBtn');
 const ctx = canvas.getContext('2d');
 
-// Preload sticker images
-window.addEventListener('load', () => {
-    const stickerTypes = ['6Valve_PL', 'Low_6BIB_PL', 'Mid_6BIB_PL', 'Tall_6BIB_PL'];
-    stickerTypes.forEach(type => {
-        const img = new Image();
-        img.src = `images/${type}.png`;
-        stickerImages[type] = img;
-    });
-});
+async function scanForStickers() {
+    try {
+        const directories = await window.fs.readdir('images');
+        const stickersBySection = {};
 
-// Add click handlers for stickers
-document.addEventListener('DOMContentLoaded', () => {
-    const stickerItems = document.querySelectorAll('.sticker-item');
-    stickerItems.forEach(item => {
+        for (const dir of directories) {
+            if ((await window.fs.stat(`images/${dir}`)).isDirectory()) {
+                const files = await window.fs.readdir(`images/${dir}`);
+                stickersBySection[dir] = files.filter(f => f.endsWith('.png'));
+
+                stickersBySection[dir].forEach(file => {
+                    const img = new Image();
+                    img.src = `images/${dir}/${file}`;
+                    stickerImages[file] = img;
+                });
+            }
+        }
+
+        generateStickerPanels(stickersBySection);
+
+    } catch (error) {
+        console.error('Error scanning stickers:', error);
+    }
+}
+
+function generateStickerPanels(sections) {
+    const stickerPicker = document.querySelector('.sticker-picker');
+    stickerPicker.innerHTML = '';
+
+    Object.entries(sections).forEach(([section, files], index) => {
+        const panel = document.createElement('div');
+        panel.className = `sticker-panel ${index === 0 ? 'active' : ''}`;
+        panel.innerHTML = `
+            <h3>${section}</h3>
+            <div class="sticker-grid">
+                ${files.map(file => `
+                    <img src="images/${section}/${file}"
+                         alt="${file}"
+                         class="sticker-item"
+                         data-sticker-type="${file}">
+                `).join('')}
+            </div>
+        `;
+        stickerPicker.innerHTML += panel.outerHTML;
+    });
+
+    document.querySelectorAll('.sticker-item').forEach(item => {
         item.addEventListener('click', () => {
             const stickerType = item.getAttribute('data-sticker-type');
-            if (stickerType) {
-                toggleSticker(stickerType);
-            }
+            if (stickerType) toggleSticker(stickerType);
         });
     });
-});
+}
+
+window.addEventListener('load', scanForStickers);
 
 async function startCamera() {
     try {
@@ -195,13 +231,11 @@ function addSticker(stickerType) {
         return;
     }
 
-    // Calculate initial sticker size as 75% of canvas width
-    const targetWidth = canvas.width * 0.75;  // Changed from 0.5 to 0.75
+    const targetWidth = canvas.width * 0.75;
     const aspectRatio = img.naturalWidth / img.naturalHeight;
     const stickerWidth = targetWidth;
     const stickerHeight = targetWidth / aspectRatio;
 
-    // Center the sticker
     const x = (canvas.width - stickerWidth) / 2;
     const y = (canvas.height - stickerHeight) / 2;
 
@@ -236,40 +270,31 @@ function saveImage() {
 }
 
 function redrawCanvas() {
-    // Clear the entire canvas first
     ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-    // Redraw the original photo
     const photo = new Image();
     photo.src = canvas.toDataURL();
     ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
 
-    // Now draw all stickers
     stickers.forEach(sticker => {
         ctx.drawImage(sticker.img, sticker.x, sticker.y, sticker.width, sticker.height);
 
-// Draw resize handle - larger white arrows
         ctx.save();
         ctx.translate(sticker.x + sticker.width, sticker.y + sticker.height);
-        ctx.rotate(Math.PI / 4); // 45-degree rotation
+        ctx.rotate(Math.PI / 4);
 
-        // Draw white arrow with black outline
         ctx.strokeStyle = 'black';
-        ctx.lineWidth = 6;  // Increased line width
+        ctx.lineWidth = 6;
         ctx.fillStyle = 'white';
 
-        // Draw bidirectional arrow
-        const arrowSize = 60;  // Increased from 20 to 60
-        // Arrow body
+        const arrowSize = 60;
         ctx.beginPath();
         ctx.moveTo(-arrowSize/2, 0);
         ctx.lineTo(arrowSize/2, 0);
-        ctx.lineWidth = 8;  // Increased line width
+        ctx.lineWidth = 8;
         ctx.stroke();
 
-        // Arrow heads
-        const headSize = 24;  // Increased from 8 to 24
-        // Left arrow head
+        const headSize = 24;
         ctx.beginPath();
         ctx.moveTo(-arrowSize/2, 0);
         ctx.lineTo(-arrowSize/2 + headSize, -headSize/2);
@@ -278,7 +303,6 @@ function redrawCanvas() {
         ctx.fill();
         ctx.stroke();
 
-        // Right arrow head
         ctx.beginPath();
         ctx.moveTo(arrowSize/2, 0);
         ctx.lineTo(arrowSize/2 - headSize, -headSize/2);
@@ -304,9 +328,7 @@ function handleTouchStart(evt) {
     const x = touch.clientX - rect.left;
     const y = touch.clientY - rect.top;
 
-    // Check if touch is on a sticker
     stickers.forEach(sticker => {
-        // Check for resize handle
         const resizeDistance = Math.hypot(
             x - (sticker.x + sticker.width),
             y - (sticker.y + sticker.height)
@@ -320,7 +342,6 @@ function handleTouchStart(evt) {
             return;
         }
 
-        // Check for drag
         if (x >= sticker.x && x <= sticker.x + sticker.width &&
             y >= sticker.y && y <= sticker.y + sticker.height) {
             activeSticker = sticker;
@@ -341,16 +362,11 @@ function handleTouchMove(evt) {
     const y = touch.clientY - rect.top;
 
     if (isDragging) {
-        // Handle dragging
         activeSticker.x = x - startX;
         activeSticker.y = y - startY;
     } else {
-        // Handle resizing with aspect ratio
         const originalAspectRatio = activeSticker.img.naturalWidth / activeSticker.img.naturalHeight;
-
-        // Calculate new width based on drag position
         const newWidth = Math.max(50, Math.abs(x - activeSticker.x));
-        // Calculate height to maintain aspect ratio
         const newHeight = newWidth / originalAspectRatio;
 
         activeSticker.width = newWidth;
@@ -366,16 +382,14 @@ function handleTouchEnd() {
 }
 
 function toggleSticker(stickerType) {
-    // Check if this type of sticker already exists
     const existingSticker = stickers.find(s => s.type === stickerType);
 
     if (existingSticker) {
-        // Remove the sticker if it exists
         stickers = stickers.filter(s => s.type !== stickerType);
         redrawCanvas();
         showNotification('Sticker removed');
     } else {
-        // Add new sticker if it doesn't exist
         addSticker(stickerType);
     }
 }
+```
