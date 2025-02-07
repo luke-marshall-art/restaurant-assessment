@@ -16,7 +16,7 @@ const ctx = canvas.getContext('2d');
 
 // Preload sticker images
 window.addEventListener('load', () => {
-    const stickerTypes = ['6valve', 'Low_6BIB', 'Mid_6BIB', 'Tall_6BIB'];
+    const stickerTypes = ['6valve_PL', 'Low_6BIB_PL', 'Mid_6BIB_PL', 'Tall_6BIB_PL'];
     stickerTypes.forEach(type => {
         const img = new Image();
         img.src = `images/${type}.png`;
