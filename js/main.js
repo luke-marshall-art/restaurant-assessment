@@ -49,18 +49,15 @@ function generateStickerPanels(sections) {
     Object.entries(sections).forEach(([section, files], index) => {
         const panel = document.createElement('div');
         panel.className = `sticker-panel ${index === 0 ? 'active' : ''}`;
-        panel.innerHTML = `
-            <h3>${section}</h3>
-            <div class="sticker-grid">
-                ${files.map(file => `
-                    <img src="images/${section}/${file}"
-                         alt="${file}"
-                         class="sticker-item"
-                         data-sticker-type="${file}">
-                `).join('')}
-            </div>
-        `;
-        stickerPicker.innerHTML += panel.outerHTML;
+        panel.setAttribute('data-location', section.toLowerCase().replace(/ /g, ''));
+        panel.innerHTML =
+            `<h3>${section}</h3>
+             <div class="sticker-grid">
+                ${files.map(file =>
+                    `<img src="images/${section}/${file}" alt="${file}" class="sticker-item" data-sticker-type="${file}">`
+                ).join('')}
+             </div>`;
+        stickerPicker.appendChild(panel);
     });
 
     document.querySelectorAll('.sticker-item').forEach(item => {
@@ -155,9 +152,11 @@ function selectLocation(locationType) {
     document.querySelectorAll('.sticker-panel').forEach(panel =>
         panel.classList.remove('active'));
 
-    event.target.classList.add('active');
-    document.querySelector(`.sticker-panel.${locationType}`)
-            .classList.add('active');
+    const clickedBtn = document.querySelector(`.location-btn[onclick*="${locationType}"]`);
+    if (clickedBtn) clickedBtn.classList.add('active');
+
+    const matchingPanel = document.querySelector(`.sticker-panel[data-location*="${locationType}"]`);
+    if (matchingPanel) matchingPanel.classList.add('active');
 }
 
 function validateInputs() {

@@ -6,18 +6,6 @@
   <component name="ChangeListManager">
     <list default="true" id="9216abb5-7ec9-4098-87d9-8af4e0b5b927" name="Changes" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/images/6Valve_PL.png" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/images/Backup/400x400electrical-marker.png" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/images/Backup/400x400fountain-marker.png" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/images/Backup/OGstorage-marker.png" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/images/Backup/OGsyrup-marker.png" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/images/Backup/electrical-marker.png" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/images/Backup/fountain-marker.png" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/images/Backup/storage-marker.png" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/images/Backup/syrup-marker.png" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/images/Low_6BIB_PL.png" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/images/Mid_6BIB_PL.png" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/images/Tall_6BIB_PL.png" beforeDir="false" />
       <change beforePath="$PROJECT_DIR$/js/main.js" beforeDir="false" afterPath="$PROJECT_DIR$/js/main.js" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
