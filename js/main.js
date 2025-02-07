@@ -195,8 +195,8 @@ function addSticker(stickerType) {
         return;
     }
 
-    // Calculate initial sticker size as 50% of canvas width
-    const targetWidth = canvas.width * 0.5;
+    // Calculate initial sticker size as 75% of canvas width
+    const targetWidth = canvas.width * 0.75;  // Changed from 0.5 to 0.75
     const aspectRatio = img.naturalWidth / img.naturalHeight;
     const stickerWidth = targetWidth;
     const stickerHeight = targetWidth / aspectRatio;
@@ -248,27 +248,27 @@ function redrawCanvas() {
     stickers.forEach(sticker => {
         ctx.drawImage(sticker.img, sticker.x, sticker.y, sticker.width, sticker.height);
 
-        // Draw resize handle - new diagonal arrow style
+// Draw resize handle - larger white arrows
         ctx.save();
         ctx.translate(sticker.x + sticker.width, sticker.y + sticker.height);
         ctx.rotate(Math.PI / 4); // 45-degree rotation
 
         // Draw white arrow with black outline
         ctx.strokeStyle = 'black';
-        ctx.lineWidth = 3;
+        ctx.lineWidth = 6;  // Increased line width
         ctx.fillStyle = 'white';
 
         // Draw bidirectional arrow
-        const arrowSize = 20;
+        const arrowSize = 60;  // Increased from 20 to 60
         // Arrow body
         ctx.beginPath();
         ctx.moveTo(-arrowSize/2, 0);
         ctx.lineTo(arrowSize/2, 0);
-        ctx.lineWidth = 4;
+        ctx.lineWidth = 8;  // Increased line width
         ctx.stroke();
 
         // Arrow heads
-        const headSize = 8;
+        const headSize = 24;  // Increased from 8 to 24
         // Left arrow head
         ctx.beginPath();
         ctx.moveTo(-arrowSize/2, 0);
