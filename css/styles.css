@@ -234,5 +234,5 @@ body {
     box-sizing: border-box;
     /* Slightly reduce the border width if needed */
     margin: 1px;  /* This will prevent the border from touching the edge */
-    border-radius: 5px;
+    border-radius: 2px;
 }
