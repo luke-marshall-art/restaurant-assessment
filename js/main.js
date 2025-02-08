@@ -373,13 +373,19 @@ function handleTouchEnd() {
 }
 
 function toggleSticker(stickerType) {
-   const existingSticker = stickers.find(s => s.type === stickerType);
+    const existingSticker = stickers.find(s => s.type === stickerType);
+    // Find the corresponding button
+    const stickerButton = document.querySelector(`[data-sticker-type="${stickerType}"]`);
 
-   if (existingSticker) {
-       stickers = stickers.filter(s => s.type !== stickerType);
-       redrawCanvas();
-       showNotification('Sticker removed');
-   } else {
-       addSticker(stickerType);
-   }
+    if (existingSticker) {
+        stickers = stickers.filter(s => s.type !== stickerType);
+        redrawCanvas();
+        showNotification('Sticker removed');
+        // Remove active class from button
+        stickerButton?.classList.remove('active');
+    } else {
+        addSticker(stickerType);
+        // Add active class to button
+        stickerButton?.classList.add('active');
+    }
 }
