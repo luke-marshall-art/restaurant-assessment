@@ -14,6 +14,8 @@ const canvas = document.getElementById('canvas');
 const captureBtn = document.getElementById('captureBtn');
 const saveBtn = document.getElementById('saveBtn');
 const ctx = canvas.getContext('2d');
+const resizeIcon = new Image();
+resizeIcon.src = 'images/resize-icon.png';  // Update path as needed
 
 // Preload sticker images
 window.addEventListener('load', () => {
@@ -281,43 +283,12 @@ function redrawCanvas() {
         stickers.forEach(sticker => {
             ctx.drawImage(sticker.img, sticker.x, sticker.y, sticker.width, sticker.height);
 
-             ctx.save();
-            ctx.translate(sticker.x + sticker.width, sticker.y + sticker.height);
-
-            // Draw white circle with black outline
-            ctx.beginPath();
-            ctx.arc(0, 0, 15, 0, Math.PI * 2);
-            ctx.fillStyle = 'white';
-            ctx.fill();
-            ctx.strokeStyle = 'black';
-            ctx.lineWidth = 2;
-            ctx.stroke();
-
-            // Draw the diagonal arrows
-            ctx.strokeStyle = 'black';
-            ctx.lineWidth = 2;
-
-            // Bottom-left to top-right arrow
-            ctx.beginPath();
-            ctx.moveTo(-8, 8);
-            ctx.lineTo(8, -8);
-            ctx.moveTo(8, -8);
-            ctx.lineTo(8, -3);    // Arrow head
-            ctx.moveTo(8, -8);
-            ctx.lineTo(3, -8);    // Arrow head
-            ctx.stroke();
-
-            // Top-left to bottom-right arrow
-            ctx.beginPath();
-            ctx.moveTo(-8, -8);
-            ctx.lineTo(8, 8);
-            ctx.moveTo(-8, -8);
-            ctx.lineTo(-3, -8);   // Arrow head
-            ctx.moveTo(-8, -8);
-            ctx.lineTo(-8, -3);   // Arrow head
-            ctx.stroke();
-
-            ctx.restore();
+             // Draw resize icon in corner
+            ctx.drawImage(resizeIcon,
+                         sticker.x + sticker.width - 15,  // X position (15px left of corner)
+                         sticker.y + sticker.height - 15, // Y position (15px up from corner)
+                         30,  // Width of drawn icon
+                         30); // Height of drawn icon
         });
     };
     photo.src = basePhoto;
