@@ -284,60 +284,30 @@ function redrawCanvas() {
             ctx.save();
             ctx.translate(sticker.x + sticker.width, sticker.y + sticker.height);
 
-            // Draw the outer white stroke
-            ctx.strokeStyle = 'white';
-            ctx.lineWidth = 6;
-
-            // First arrow (top-right to bottom-left)
-            ctx.beginPath();
-            ctx.moveTo(15, -15);
-            ctx.lineTo(-15, 15);
-            ctx.moveTo(5, -15);  // Arrow head
-            ctx.lineTo(15, -15);
-            ctx.lineTo(15, -5);
-            ctx.moveTo(-15, 15);  // Arrow head
-            ctx.lineTo(-15, 5);
-            ctx.lineTo(-5, 15);
-            ctx.stroke();
-
-            // Second arrow (top-left to bottom-right)
-            ctx.beginPath();
-            ctx.moveTo(-15, -15);
-            ctx.lineTo(15, 15);
-            ctx.moveTo(-15, -5);  // Arrow head
-            ctx.lineTo(-15, -15);
-            ctx.lineTo(-5, -15);
-            ctx.moveTo(15, 15);  // Arrow head
-            ctx.lineTo(15, 5);
-            ctx.lineTo(5, 15);
-            ctx.stroke();
-
-            // Draw the black inner stroke
+            // Set styles for outline and fill
             ctx.strokeStyle = 'black';
             ctx.lineWidth = 2;
+            ctx.fillStyle = 'white';
 
-            // Repeat the same paths with thinner black stroke
+            // Left chevron
             ctx.beginPath();
-            ctx.moveTo(15, -15);
-            ctx.lineTo(-15, 15);
-            ctx.moveTo(5, -15);
-            ctx.lineTo(15, -15);
-            ctx.lineTo(15, -5);
-            ctx.moveTo(-15, 15);
-            ctx.lineTo(-15, 5);
-            ctx.lineTo(-5, 15);
-            ctx.stroke();
+            ctx.moveTo(-25, 0);    // Start at center
+            ctx.lineTo(-15, -10);  // Top point
+            ctx.lineTo(-5, 0);     // Back to center
+            ctx.lineTo(-15, 10);   // Bottom point
+            ctx.closePath();
+            ctx.fill();            // Fill white
+            ctx.stroke();          // Draw black outline
 
+            // Right chevron
             ctx.beginPath();
-            ctx.moveTo(-15, -15);
-            ctx.lineTo(15, 15);
-            ctx.moveTo(-15, -5);
-            ctx.lineTo(-15, -15);
-            ctx.lineTo(-5, -15);
-            ctx.moveTo(15, 15);
-            ctx.lineTo(15, 5);
-            ctx.lineTo(5, 15);
-            ctx.stroke();
+            ctx.moveTo(5, 0);      // Start at center
+            ctx.lineTo(15, -10);   // Top point
+            ctx.lineTo(25, 0);     // Back to center
+            ctx.lineTo(15, 10);    // Bottom point
+            ctx.closePath();
+            ctx.fill();            // Fill white
+            ctx.stroke();          // Draw black outline
 
             ctx.restore();
         });
