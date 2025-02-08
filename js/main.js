@@ -281,33 +281,41 @@ function redrawCanvas() {
         stickers.forEach(sticker => {
             ctx.drawImage(sticker.img, sticker.x, sticker.y, sticker.width, sticker.height);
 
-            ctx.save();
+             ctx.save();
             ctx.translate(sticker.x + sticker.width, sticker.y + sticker.height);
 
-            // Set styles for outline and fill
+            // Draw white circle with black outline
+            ctx.beginPath();
+            ctx.arc(0, 0, 15, 0, Math.PI * 2);
+            ctx.fillStyle = 'white';
+            ctx.fill();
             ctx.strokeStyle = 'black';
             ctx.lineWidth = 2;
-            ctx.fillStyle = 'white';
+            ctx.stroke();
 
-            // Left chevron
-            ctx.beginPath();
-            ctx.moveTo(-25, 0);    // Start at center
-            ctx.lineTo(-15, -10);  // Top point
-            ctx.lineTo(-5, 0);     // Back to center
-            ctx.lineTo(-15, 10);   // Bottom point
-            ctx.closePath();
-            ctx.fill();            // Fill white
-            ctx.stroke();          // Draw black outline
+            // Draw the diagonal arrows
+            ctx.strokeStyle = 'black';
+            ctx.lineWidth = 2;
 
-            // Right chevron
+            // Bottom-left to top-right arrow
             ctx.beginPath();
-            ctx.moveTo(5, 0);      // Start at center
-            ctx.lineTo(15, -10);   // Top point
-            ctx.lineTo(25, 0);     // Back to center
-            ctx.lineTo(15, 10);    // Bottom point
-            ctx.closePath();
-            ctx.fill();            // Fill white
-            ctx.stroke();          // Draw black outline
+            ctx.moveTo(-8, 8);
+            ctx.lineTo(8, -8);
+            ctx.moveTo(8, -8);
+            ctx.lineTo(8, -3);    // Arrow head
+            ctx.moveTo(8, -8);
+            ctx.lineTo(3, -8);    // Arrow head
+            ctx.stroke();
+
+            // Top-left to bottom-right arrow
+            ctx.beginPath();
+            ctx.moveTo(-8, -8);
+            ctx.lineTo(8, 8);
+            ctx.moveTo(-8, -8);
+            ctx.lineTo(-3, -8);   // Arrow head
+            ctx.moveTo(-8, -8);
+            ctx.lineTo(-8, -3);   // Arrow head
+            ctx.stroke();
 
             ctx.restore();
         });
