@@ -272,23 +272,23 @@ function saveImage() {
 function redrawCanvas() {
     if (!basePhoto) return;
 
+    // Clear the canvas first
     ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-    // Draw the stored base photo
+    // Create a new image and wait for it to load before drawing
     const photo = new Image();
     photo.onload = () => {
+        // Draw base photo
         ctx.drawImage(photo, 0, 0, canvas.width, canvas.height);
 
         // Draw all stickers
         stickers.forEach(sticker => {
             ctx.drawImage(sticker.img, sticker.x, sticker.y, sticker.width, sticker.height);
-
-             // Draw resize icon in corner
+            // Draw resize icon
             ctx.drawImage(resizeIcon,
-                         sticker.x + sticker.width - 30,  // X position (15px left of corner)
-                         sticker.y + sticker.height - 30, // Y position (15px up from corner)
-                         60,  // Width of drawn icon
-                         60); // Height of drawn icon
+                         sticker.x + sticker.width - 30,
+                         sticker.y + sticker.height - 30,
+                         60, 60);
         });
     };
     photo.src = basePhoto;
@@ -301,11 +301,12 @@ function setupTouchHandlers() {
 }
 
 function handleTouchStart(evt) {
-   evt.preventDefault();
-   const touch = evt.touches[0];
-   const rect = canvas.getBoundingClientRect();
-   const x = touch.clientX - rect.left;
-   const y = touch.clientY - rect.top;
+    evt.preventDefault();
+    const touch = evt.touches[0];
+    const rect = canvas.getBoundingClientRect();
+    // Apply scaling factor to handle high DPI displays
+    const x = (touch.clientX - rect.left) * (canvas.width / rect.width);
+    const y = (touch.clientY - rect.top) * (canvas.height / rect.height);
 
    stickers.forEach(sticker => {
        const resizeDistance = Math.hypot(
@@ -332,27 +333,30 @@ function handleTouchStart(evt) {
 }
 
 function handleTouchMove(evt) {
-   if (!activeSticker) return;
-   evt.preventDefault();
+    if (!activeSticker) return;
+    evt.preventDefault();
 
-   const touch = evt.touches[0];
-   const rect = canvas.getBoundingClientRect();
-   const x = touch.clientX - rect.left;
-   const y = touch.clientY - rect.top;
+    // Get touch coordinates
+    const touch = evt.touches[0];
+    const rect = canvas.getBoundingClientRect();
+    const x = (touch.clientX - rect.left) * (canvas.width / rect.width);
+    const y = (touch.clientY - rect.top) * (canvas.height / rect.height);
 
-   if (isDragging) {
-       activeSticker.x = x - startX;
-       activeSticker.y = y - startY;
-   } else {
-       const originalAspectRatio = activeSticker.img.naturalWidth / activeSticker.img.naturalHeight;
-       const newWidth = Math.max(50, Math.abs(x - activeSticker.x));
-       const newHeight = newWidth / originalAspectRatio;
+    // Use requestAnimationFrame for smoother updates
+    requestAnimationFrame(() => {
+        if (isDragging) {
+            activeSticker.x = x - startX;
+            activeSticker.y = y - startY;
+        } else {
+            const originalAspectRatio = activeSticker.img.naturalWidth / activeSticker.img.naturalHeight;
+            const newWidth = Math.max(50, Math.abs(x - activeSticker.x));
+            const newHeight = newWidth / originalAspectRatio;
 
-       activeSticker.width = newWidth;
-       activeSticker.height = newHeight;
-   }
-
-   redrawCanvas();
+            activeSticker.width = newWidth;
+            activeSticker.height = newHeight;
+        }
+        redrawCanvas();
+    });
 }
 
 function handleTouchEnd() {
