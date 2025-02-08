@@ -229,11 +229,10 @@ body {
 }
 
 .sticker-item.active {
-    border: 2px solid #0066cc;  /* Using your primary blue color */
-    background: rgba(0, 102, 204, 0.1);  /* Light blue tint */
-    /* Add some padding and ensure border is included in element size */
+    border: 2px solid #0066cc;
+    background: rgba(0, 102, 204, 0.1);
     box-sizing: border-box;
-    padding: 10px;
-    /* You might also want to reduce the border radius slightly */
+    /* Slightly reduce the border width if needed */
+    margin: 1px;  /* This will prevent the border from touching the edge */
     border-radius: 10px;
 }
