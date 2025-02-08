@@ -7,6 +7,7 @@ let startX = 0;
 let startY = 0;
 let initialSticker = null;
 let basePhoto = null;
+let baseImage = null;
 const stickerImages = {};
 
 const video = document.getElementById('videoElement');
@@ -199,6 +200,13 @@ function capturePhoto() {
         // Store the base photo data
         basePhoto = canvas.toDataURL('image/png');
 
+        // Initialize the base image
+        baseImage = new Image();
+        baseImage.onload = () => {
+            console.log('Base image initialized');
+        };
+        baseImage.src = basePhoto;
+
         stream.getTracks().forEach(track => track.stop());
         stream = null;
 
@@ -215,6 +223,7 @@ function capturePhoto() {
         showNotification('Error capturing photo. Please try again.');
     }
 }
+
 
 
 function addSticker(stickerType) {
@@ -275,25 +284,16 @@ function saveImage() {
 }
 
 function redrawCanvas() {
-    console.log('basePhoto exists:', !!basePhoto);
-    console.log('Number of stickers:', stickers.length);
-    console.log('Canvas dimensions:', canvas.width, 'x', canvas.height);
-
-    if (!basePhoto) return;
+    if (!basePhoto || !baseImage) return;
 
     // Clear the canvas
     ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-    // Draw the base photo directly
-    const photo = new Image();
-    photo.src = basePhoto;
-    console.log('Drawing base photo...');
-    ctx.drawImage(photo, 0, 0, canvas.width, canvas.height);
-    console.log('Base photo drawn');
+    // Draw the cached base image
+    ctx.drawImage(baseImage, 0, 0, canvas.width, canvas.height);
 
     // Draw all stickers
-    stickers.forEach((sticker, index) => {
-        console.log(`Drawing sticker ${index + 1}`);
+    stickers.forEach(sticker => {
         ctx.drawImage(sticker.img, sticker.x, sticker.y, sticker.width, sticker.height);
         ctx.drawImage(resizeIcon,
                      sticker.x + sticker.width - 30,
