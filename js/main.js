@@ -285,10 +285,10 @@ function redrawCanvas() {
 
              // Draw resize icon in corner
             ctx.drawImage(resizeIcon,
-                         sticker.x + sticker.width - 15,  // X position (15px left of corner)
-                         sticker.y + sticker.height - 15, // Y position (15px up from corner)
-                         30,  // Width of drawn icon
-                         30); // Height of drawn icon
+                         sticker.x + sticker.width - 30,  // X position (15px left of corner)
+                         sticker.y + sticker.height - 30, // Y position (15px up from corner)
+                         60,  // Width of drawn icon
+                         60); // Height of drawn icon
         });
     };
     photo.src = basePhoto;
