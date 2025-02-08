@@ -229,13 +229,18 @@ function addSticker(stickerType) {
         return;
     }
 
-    // Adjust to 50% of canvas width for initial size
+    // Force a redraw of the base photo first
+    const photo = new Image();
+    photo.src = basePhoto;
+    ctx.drawImage(photo, 0, 0, canvas.width, canvas.height);
+
+    // Calculate sticker dimensions
     const targetWidth = canvas.width * 0.5;
     const aspectRatio = img.naturalWidth / img.naturalHeight;
     const stickerWidth = targetWidth;
     const stickerHeight = targetWidth / aspectRatio;
 
-    // Center both horizontally and vertically
+    // Center sticker
     const x = Math.max(0, (canvas.width - stickerWidth) / 2);
     const y = Math.max(0, (canvas.height - stickerHeight) / 2);
 
