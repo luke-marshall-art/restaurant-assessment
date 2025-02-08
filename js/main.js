@@ -10,8 +10,11 @@ let basePhoto = null;
 let baseImage = null;
 let isMouseDown = false;
 let isResizing = false;
-const stickerImages = {};
+let initialDistance = 0;
+let initialScale = 1;
+let isPinching = false;
 
+const stickerImages = {};
 const video = document.getElementById('videoElement');
 const canvas = document.getElementById('canvas');
 const captureBtn = document.getElementById('captureBtn');
@@ -290,19 +293,24 @@ function saveImage() {
 function redrawCanvas() {
     if (!basePhoto || !baseImage) return;
 
-    // Clear the canvas
     ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-    // Draw the cached base image
     ctx.drawImage(baseImage, 0, 0, canvas.width, canvas.height);
 
-    // Draw all stickers
     stickers.forEach(sticker => {
         ctx.drawImage(sticker.img, sticker.x, sticker.y, sticker.width, sticker.height);
+
+        // Highlight active sticker
+        if (sticker === activeSticker) {
+            ctx.strokeStyle = '#0066cc';
+            ctx.lineWidth = 2;
+            ctx.strokeRect(sticker.x, sticker.y, sticker.width, sticker.height);
+        }
+
+        // Draw resize handle
         ctx.drawImage(resizeIcon,
-                     sticker.x + sticker.width - 30,
-                     sticker.y + sticker.height - 30,
-                     60, 60);
+            sticker.x + sticker.width - 30,
+            sticker.y + sticker.height - 30,
+            60, 60);
     });
 }
 
@@ -449,67 +457,131 @@ function handleMouseOver(e) {
 
 function handleTouchStart(evt) {
     evt.preventDefault();
-    const touch = evt.touches[0];
-    const rect = canvas.getBoundingClientRect();
-    // Apply scaling factor to handle high DPI displays
-    const x = (touch.clientX - rect.left) * (canvas.width / rect.width);
-    const y = (touch.clientY - rect.top) * (canvas.height / rect.height);
 
-   stickers.forEach(sticker => {
-       const resizeDistance = Math.hypot(
-           x - (sticker.x + sticker.width),
-           y - (sticker.y + sticker.height)
-       );
-       if (resizeDistance < 20) {
-           activeSticker = sticker;
-           isDragging = false;
-           initialSticker = { ...sticker };
-           startX = x;
-           startY = y;
-           return;
-       }
+    if (evt.touches.length === 2 && activeSticker) {
+        // Initialize pinch-zoom
+        isPinching = true;
+        isDragging = false;
+        isResizing = false;
 
-       if (x >= sticker.x && x <= sticker.x + sticker.width &&
-           y >= sticker.y && y <= sticker.y + sticker.height) {
-           activeSticker = sticker;
-           isDragging = true;
-           startX = x - sticker.x;
-           startY = y - sticker.y;
-       }
-   });
+        initialDistance = getTouchDistance(evt.touches[0], evt.touches[1]);
+        initialScale = activeSticker.width / activeSticker.img.naturalWidth;
+
+        return;
+    }
+
+    if (evt.touches.length === 1) {
+        isPinching = false;
+        const touch = evt.touches[0];
+        const coords = getCanvasCoordinates(evt);
+
+        // Check stickers in reverse order (top to bottom)
+        for (let i = stickers.length - 1; i >= 0; i--) {
+            const sticker = stickers[i];
+
+            // Check for resize handle first
+            const resizeDistance = Math.hypot(
+                coords.x - (sticker.x + sticker.width),
+                coords.y - (sticker.y + sticker.height)
+            );
+
+            if (resizeDistance < 30) {
+                activeSticker = sticker;
+                isResizing = true;
+                isDragging = false;
+                initialSticker = { ...sticker };
+                startX = coords.x;
+                startY = coords.y;
+                return;
+            }
+
+            // Check for sticker body
+            if (coords.x >= sticker.x && coords.x <= sticker.x + sticker.width &&
+                coords.y >= sticker.y && coords.y <= sticker.y + sticker.height) {
+                activeSticker = sticker;
+                isDragging = true;
+                isResizing = false;
+                startX = coords.x - sticker.x;
+                startY = coords.y - sticker.y;
+                // Bring sticker to front
+                stickers = stickers.filter(s => s !== sticker);
+                stickers.push(sticker);
+                redrawCanvas();
+                return;
+            }
+        }
+    }
 }
+
 
 function handleTouchMove(evt) {
-    if (!activeSticker) return;
     evt.preventDefault();
+    if (!activeSticker) return;
 
-    // Get touch coordinates
-    const touch = evt.touches[0];
-    const rect = canvas.getBoundingClientRect();
-    const x = (touch.clientX - rect.left) * (canvas.width / rect.width);
-    const y = (touch.clientY - rect.top) * (canvas.height / rect.height);
+    if (isPinching && evt.touches.length === 2) {
+        // Handle pinch-zoom
+        const currentDistance = getTouchDistance(evt.touches[0], evt.touches[1]);
+        const scale = (currentDistance / initialDistance);
+        const center = getTouchCenter(evt.touches[0], evt.touches[1]);
 
-    // Use requestAnimationFrame for smoother updates
-    requestAnimationFrame(() => {
-        if (isDragging) {
-            activeSticker.x = x - startX;
-            activeSticker.y = y - startY;
-        } else {
-            const originalAspectRatio = activeSticker.img.naturalWidth / activeSticker.img.naturalHeight;
-            const newWidth = Math.max(50, Math.abs(x - activeSticker.x));
-            const newHeight = newWidth / originalAspectRatio;
+        // Calculate new dimensions while maintaining aspect ratio
+        const originalAspectRatio = activeSticker.img.naturalWidth / activeSticker.img.naturalHeight;
+        const baseWidth = activeSticker.img.naturalWidth * initialScale;
+        const newWidth = Math.max(50, baseWidth * scale);
+        const newHeight = newWidth / originalAspectRatio;
 
-            activeSticker.width = newWidth;
-            activeSticker.height = newHeight;
+        // Update sticker position to zoom around center point
+        const widthDiff = newWidth - activeSticker.width;
+        const heightDiff = newHeight - activeSticker.height;
+
+        activeSticker.width = newWidth;
+        activeSticker.height = newHeight;
+        activeSticker.x -= widthDiff / 2;
+        activeSticker.y -= heightDiff / 2;
+
+        requestAnimationFrame(redrawCanvas);
+        return;
+    }
+
+    if (evt.touches.length === 1) {
+        const coords = getCanvasCoordinates(evt);
+
+        requestAnimationFrame(() => {
+            if (isDragging) {
+                activeSticker.x = coords.x - startX;
+                activeSticker.y = coords.y - startY;
+            } else if (isResizing) {
+                const originalAspectRatio = activeSticker.img.naturalWidth / activeSticker.img.naturalHeight;
+                const newWidth = Math.max(50, Math.abs(coords.x - activeSticker.x));
+                const newHeight = newWidth / originalAspectRatio;
+
+                activeSticker.width = newWidth;
+                activeSticker.height = newHeight;
+            }
+            redrawCanvas();
+        });
+    }
+}
+
+function handleTouchEnd(evt) {
+    if (evt.touches.length === 0) {
+        isPinching = false;
+        isDragging = false;
+        isResizing = false;
+        activeSticker = null;
+    } else if (evt.touches.length === 1) {
+        // If we were pinching and now have one finger, reset to potential drag
+        if (isPinching) {
+            isPinching = false;
+            const touch = evt.touches[0];
+            const coords = getCanvasCoordinates({ type: 'touch', touches: [touch] });
+            startX = coords.x - activeSticker.x;
+            startY = coords.y - activeSticker.y;
+            isDragging = true;
         }
-        redrawCanvas();
-    });
+    }
 }
 
-function handleTouchEnd() {
-   activeSticker = null;
-   isDragging = false;
-}
 
 function toggleSticker(stickerType) {
     const existingSticker = stickers.find(s => s.type === stickerType);
@@ -527,4 +599,23 @@ function toggleSticker(stickerType) {
         // Add active class to button
         stickerButton?.classList.add('active');
     }
+}
+
+// Helper function to calculate distance between two touch points
+function getTouchDistance(touch1, touch2) {
+    const dx = touch1.clientX - touch2.clientX;
+    const dy = touch1.clientY - touch2.clientY;
+    return Math.sqrt(dx * dx + dy * dy);
+}
+
+// Helper function to get center point between two touches
+function getTouchCenter(touch1, touch2) {
+    const rect = canvas.getBoundingClientRect();
+    const scaleX = canvas.width / rect.width;
+    const scaleY = canvas.height / rect.height;
+
+    return {
+        x: ((touch1.clientX + touch2.clientX) / 2 - rect.left) * scaleX,
+        y: ((touch1.clientY + touch2.clientY) / 2 - rect.top) * scaleY
+    };
 }
