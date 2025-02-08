@@ -276,27 +276,30 @@ function saveImage() {
 
 function redrawCanvas() {
     console.log('basePhoto exists:', !!basePhoto);
+    console.log('Number of stickers:', stickers.length);
+    console.log('Canvas dimensions:', canvas.width, 'x', canvas.height);
+
     if (!basePhoto) return;
 
     // Clear the canvas
     ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-    // Create and draw base photo first, ensure it completes
+    // Draw the base photo directly
     const photo = new Image();
-    photo.onload = () => {
-        // Draw base photo
-        ctx.drawImage(photo, 0, 0, canvas.width, canvas.height);
-
-        // Then draw stickers
-        stickers.forEach(sticker => {
-            ctx.drawImage(sticker.img, sticker.x, sticker.y, sticker.width, sticker.height);
-            ctx.drawImage(resizeIcon,
-                         sticker.x + sticker.width - 30,
-                         sticker.y + sticker.height - 30,
-                         60, 60);
-        });
-    };
     photo.src = basePhoto;
+    console.log('Drawing base photo...');
+    ctx.drawImage(photo, 0, 0, canvas.width, canvas.height);
+    console.log('Base photo drawn');
+
+    // Draw all stickers
+    stickers.forEach((sticker, index) => {
+        console.log(`Drawing sticker ${index + 1}`);
+        ctx.drawImage(sticker.img, sticker.x, sticker.y, sticker.width, sticker.height);
+        ctx.drawImage(resizeIcon,
+                     sticker.x + sticker.width - 30,
+                     sticker.y + sticker.height - 30,
+                     60, 60);
+    });
 }
 
 function setupTouchHandlers() {
