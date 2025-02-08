@@ -8,6 +8,8 @@ let startY = 0;
 let initialSticker = null;
 let basePhoto = null;
 let baseImage = null;
+let isMouseDown = false;
+let isResizing = false;
 const stickerImages = {};
 
 const video = document.getElementById('videoElement');
@@ -215,7 +217,9 @@ function capturePhoto() {
         captureBtn.disabled = true;
         saveBtn.disabled = false;
 
-        setupTouchHandlers();
+        // Setup all interaction handlers
+        setupInteractionHandlers();
+        canvas.addEventListener('mousemove', handleMouseOver, false);
 
         showNotification('Photo captured! Add stickers or save.');
     } catch (error) {
@@ -302,10 +306,145 @@ function redrawCanvas() {
     });
 }
 
-function setupTouchHandlers() {
-   canvas.addEventListener('touchstart', handleTouchStart, false);
-   canvas.addEventListener('touchmove', handleTouchMove, false);
-   canvas.addEventListener('touchend', handleTouchEnd, false);
+function setupInteractionHandlers() {
+    // Existing touch handlers
+    canvas.addEventListener('touchstart', handleTouchStart, false);
+    canvas.addEventListener('touchmove', handleTouchMove, false);
+    canvas.addEventListener('touchend', handleTouchEnd, false);
+
+    // New mouse handlers
+    canvas.addEventListener('mousedown', handleMouseDown, false);
+    canvas.addEventListener('mousemove', handleMouseMove, false);
+    canvas.addEventListener('mouseup', handleMouseUp, false);
+    // Prevent context menu on right-click
+    canvas.addEventListener('contextmenu', (e) => e.preventDefault(), false);
+}
+
+function getCanvasCoordinates(e) {
+    const rect = canvas.getBoundingClientRect();
+    const scaleX = canvas.width / rect.width;
+    const scaleY = canvas.height / rect.height;
+
+    if (e.type.startsWith('touch')) {
+        const touch = e.touches[0] || e.changedTouches[0];
+        return {
+            x: (touch.clientX - rect.left) * scaleX,
+            y: (touch.clientY - rect.top) * scaleY
+        };
+    } else {
+        return {
+            x: (e.clientX - rect.left) * scaleX,
+            y: (e.clientY - rect.top) * scaleY
+        };
+    }
+}
+
+function handleMouseDown(e) {
+    e.preventDefault();
+    isMouseDown = true;
+    const coords = getCanvasCoordinates(e);
+
+    // Check for resize handle first
+    stickers.forEach(sticker => {
+        const resizeHandleX = sticker.x + sticker.width - 30;
+        const resizeHandleY = sticker.y + sticker.height - 30;
+        const resizeDistance = Math.hypot(
+            coords.x - (sticker.x + sticker.width),
+            coords.y - (sticker.y + sticker.height)
+        );
+
+        if (resizeDistance < 30) { // 30px hit area for resize handle
+            activeSticker = sticker;
+            isResizing = true;
+            isDragging = false;
+            initialSticker = { ...sticker };
+            startX = coords.x;
+            startY = coords.y;
+            return;
+        }
+
+        // Check for sticker body
+        if (coords.x >= sticker.x && coords.x <= sticker.x + sticker.width &&
+            coords.y >= sticker.y && coords.y <= sticker.y + sticker.height) {
+            activeSticker = sticker;
+            isDragging = true;
+            isResizing = false;
+            startX = coords.x - sticker.x;
+            startY = coords.y - sticker.y;
+        }
+    });
+
+    // Update cursor based on action
+    if (isResizing) {
+        canvas.style.cursor = 'nw-resize';
+    } else if (isDragging) {
+        canvas.style.cursor = 'move';
+    }
+}
+
+function handleMouseMove(e) {
+    e.preventDefault();
+    if (!isMouseDown || !activeSticker) return;
+
+    const coords = getCanvasCoordinates(e);
+
+    requestAnimationFrame(() => {
+        if (isDragging) {
+            // Move the sticker
+            activeSticker.x = coords.x - startX;
+            activeSticker.y = coords.y - startY;
+        } else if (isResizing) {
+            // Resize the sticker
+            const originalAspectRatio = activeSticker.img.naturalWidth / activeSticker.img.naturalHeight;
+            const newWidth = Math.max(50, Math.abs(coords.x - activeSticker.x));
+            const newHeight = newWidth / originalAspectRatio;
+
+            activeSticker.width = newWidth;
+            activeSticker.height = newHeight;
+        }
+        redrawCanvas();
+    });
+}
+
+function handleMouseUp(e) {
+    e.preventDefault();
+    isMouseDown = false;
+    isDragging = false;
+    isResizing = false;
+    activeSticker = null;
+    canvas.style.cursor = 'default';
+}
+
+// Update the cursor when hovering over interactive elements
+function handleMouseOver(e) {
+    if (isMouseDown) return;
+
+    const coords = getCanvasCoordinates(e);
+    let cursorSet = false;
+
+    stickers.forEach(sticker => {
+        const resizeDistance = Math.hypot(
+            coords.x - (sticker.x + sticker.width),
+            coords.y - (sticker.y + sticker.height)
+        );
+
+        if (resizeDistance < 30) {
+            canvas.style.cursor = 'nw-resize';
+            cursorSet = true;
+            return;
+        }
+
+        if (coords.x >= sticker.x && coords.x <= sticker.x + sticker.width &&
+            coords.y >= sticker.y && coords.y <= sticker.y + sticker.height) {
+            canvas.style.cursor = 'move';
+            cursorSet = true;
+            return;
+        }
+    });
+
+    if (!cursorSet) {
+        canvas.style.cursor = 'default';
+    }
 }
 
 function handleTouchStart(evt) {
