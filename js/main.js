@@ -283,34 +283,60 @@ function redrawCanvas() {
 
             ctx.save();
             ctx.translate(sticker.x + sticker.width, sticker.y + sticker.height);
-            ctx.rotate(Math.PI / 4);
 
-            ctx.strokeStyle = 'black';
+            // Draw the outer white stroke
+            ctx.strokeStyle = 'white';
             ctx.lineWidth = 6;
-            ctx.fillStyle = 'white';
 
-            const arrowSize = 60;
+            // First arrow (top-right to bottom-left)
             ctx.beginPath();
-            ctx.moveTo(-arrowSize/2, 0);
-            ctx.lineTo(arrowSize/2, 0);
-            ctx.lineWidth = 8;
+            ctx.moveTo(15, -15);
+            ctx.lineTo(-15, 15);
+            ctx.moveTo(5, -15);  // Arrow head
+            ctx.lineTo(15, -15);
+            ctx.lineTo(15, -5);
+            ctx.moveTo(-15, 15);  // Arrow head
+            ctx.lineTo(-15, 5);
+            ctx.lineTo(-5, 15);
             ctx.stroke();
 
-            const headSize = 24;
+            // Second arrow (top-left to bottom-right)
             ctx.beginPath();
-            ctx.moveTo(-arrowSize/2, 0);
-            ctx.lineTo(-arrowSize/2 + headSize, -headSize/2);
-            ctx.lineTo(-arrowSize/2 + headSize, headSize/2);
-            ctx.closePath();
-            ctx.fill();
+            ctx.moveTo(-15, -15);
+            ctx.lineTo(15, 15);
+            ctx.moveTo(-15, -5);  // Arrow head
+            ctx.lineTo(-15, -15);
+            ctx.lineTo(-5, -15);
+            ctx.moveTo(15, 15);  // Arrow head
+            ctx.lineTo(15, 5);
+            ctx.lineTo(5, 15);
+            ctx.stroke();
+
+            // Draw the black inner stroke
+            ctx.strokeStyle = 'black';
+            ctx.lineWidth = 2;
+
+            // Repeat the same paths with thinner black stroke
+            ctx.beginPath();
+            ctx.moveTo(15, -15);
+            ctx.lineTo(-15, 15);
+            ctx.moveTo(5, -15);
+            ctx.lineTo(15, -15);
+            ctx.lineTo(15, -5);
+            ctx.moveTo(-15, 15);
+            ctx.lineTo(-15, 5);
+            ctx.lineTo(-5, 15);
             ctx.stroke();
 
             ctx.beginPath();
-            ctx.moveTo(arrowSize/2, 0);
-            ctx.lineTo(arrowSize/2 - headSize, -headSize/2);
-            ctx.lineTo(arrowSize/2 - headSize, headSize/2);
-            ctx.closePath();
-            ctx.fill();
+            ctx.moveTo(-15, -15);
+            ctx.lineTo(15, 15);
+            ctx.moveTo(-15, -5);
+            ctx.lineTo(-15, -15);
+            ctx.lineTo(-5, -15);
+            ctx.moveTo(15, 15);
+            ctx.lineTo(15, 5);
+            ctx.lineTo(5, 15);
             ctx.stroke();
 
             ctx.restore();
